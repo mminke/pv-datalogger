@@ -1,0 +1,50 @@
+170 bytes
+
+start bij 0!!!
+Short = 2 bytes
+Integer = 4 bytes
+
+Possible start of message meaning (see https://github.com/micromys/Omnik/blob/master/inverter_layout.html):
+4 bytes	HEADER ??
+4 bytes GEnerated ID ??
+4 bytes Generated ID ??
+
+HEX	DEC	LENGTH	DESCRIPTION
+00	000	[1]		Fixed value [68] (same as request message)	
+01	001	[14]	?? Altijd gelijk? [ 7d 41 b0 ce 1d 15 24 ce 1d 15 24 81 02 01 ]
+0F	015	[15]	Inverter Serial Number
+1F	031	[2]		Temperature
+21	033	[2]		vpv1
+23	035	[2]		vpv2
+25	037	[2]		vpv3
+27	039	[2]		ipv1
+29	041	[2]		ipv2
+2B	043	[2]		ipv3
+2D	045	[2]		iac1	Current AC ?
+2F	047	[2]		iac2
+31	049	[2]		iac3
+33	051	[2]		vac1	Voltage AC
+35	053	[2]		vac2
+37	055	[2]		vac3
+
+39	057	[2]		fac1	Frequency AC
+3B	059	[2]		pac1	Power AC
+3D	061	[2]		fac2
+3F	063	[2]		pac2
+41	065	[2]		fac3
+43	067	[2]		pac3
+
+45	069	[2]		yield today
+47	071	[4]		yield total
+
+4B	075	[4]		inverter total hours since last reset
+
+61	097	[15]	firmware version (main)
+70	112	[5]		??? 00 values
+75	117 [9]		firmware version (slave)
+
+7E	126	[11]	??? 00 values
+89	137	[14]	??? Always same values?
+97	151	[17]	Status Message [DATA SEND IS OK]
+A8	168	[1]		Changing value (CHECKSUM??)
+A9	169	[1]		Fixed value [16] (same as request message)
