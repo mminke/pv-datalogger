@@ -70,6 +70,7 @@ public class OmnikDataTransformerTest {
 
 	}
 	
+	@SuppressWarnings("unused")
 	@Test(expected=IllegalArgumentException.class)
 	public void testWrongLengthTransformation()
 	{
