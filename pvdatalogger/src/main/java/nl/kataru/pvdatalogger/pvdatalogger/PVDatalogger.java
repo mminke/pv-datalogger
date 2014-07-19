@@ -9,22 +9,220 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.jboss.netty.logging.InternalLoggerFactory;
+import org.jboss.netty.logging.Slf4JLoggerFactory;
 
 /**
- * Hello world!
+ * The main PVDatalogger class
  * 
  */
 public class PVDatalogger {
+	private static final int DEFAULT_POLLING_INTERVAL = 5; //in minutes
 	private static final int DEFAULT_LISTENER_PORT = 9999;
+	private static final String DEFAULT_LISTENER_BINDING_ADDRESS = "0.0.0.0";
+	private static Options options;
 
-	@SuppressWarnings("static-access")
+	/**
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
-		Options options = new Options();
+		String type = "poller";
+		
+		// Enable Netty loggin
+		InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory());		
+		
+		CommandLine commandLine = parseCommandLine(args);
+		
+		if (commandLine.hasOption("h")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("pvdatalogger", options);
 
-		Option option = OptionBuilder.withArgName("ip or hostname").hasArg()
+			System.exit(0);
+		}
+		if (commandLine.hasOption("t")) {
+			type = commandLine.getOptionValue("t");
+			if( !("poller".equals(type) || "listener".equals(type))) {
+				HelpFormatter formatter = new HelpFormatter();
+				formatter.printHelp("pvdatalogger", options);
+
+				System.exit(-1);
+			}
+		}
+		else
+		{
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp("pvdatalogger", options);
+
+			System.exit(-1);
+		}
+		
+		if( "poller".equals(type)) {
+			startPoller(commandLine);
+		}
+		else {
+			startListener(commandLine);
+		}
+	}
+	
+	/**
+	 * Start the logger as a data poller
+	 * 
+	 * @param commandLine
+	 * @throws InterruptedException 
+	 */
+	private static void startPoller(CommandLine commandLine) throws InterruptedException {
+		String inverter_address = "";
+		int pollingInterval = DEFAULT_POLLING_INTERVAL;
+
+		if (commandLine.hasOption("a")) {
+			inverter_address = commandLine.getOptionValue("a");
+		}
+		if (commandLine.hasOption("i")) {
+			pollingInterval = Integer.valueOf(commandLine.getOptionValue("i"));
+		}
+
+		OmnikDataPoller datalogger = new OmnikDataPoller(inverter_address);
+		 
+		// TODO: Move while loop inside OmnikDataPoller which also uses Lambda to print the results
+		while (true) {
+			Map<String, String> pvData = datalogger.retrieveData();
+
+			printData(pvData);
+
+			Thread.sleep(pollingInterval * 60000);
+		}
+	}
+	
+	/**
+	 * Start the logger as a listener
+	 * 
+	 * @param commandLine
+	 */
+	private static void startListener(CommandLine commandLine) {
+		int listenerPort = DEFAULT_LISTENER_PORT;
+		String listenerBindingAddress = DEFAULT_LISTENER_BINDING_ADDRESS;
+
+		if (commandLine.hasOption("b")) {
+			listenerBindingAddress = commandLine.getOptionValue("b");
+		}
+		if (commandLine.hasOption("p")) {
+			listenerPort = Integer.valueOf(commandLine.getOptionValue("p"));
+		}
+
+		System.out.println("Listening on: " + listenerBindingAddress + ":" + listenerPort);
+		OmnikDataListener listener = new OmnikDataListener(listenerBindingAddress, listenerPort);
+		listener.setTransformer(new OmnikDataTransformer());
+		listener.run( data -> printData(data) );
+		 
+		while (true) {
+		}
+		
+	}
+	
+	/**
+	 * Output the data as a comma separated string to standard out
+	 * @param pvData
+	 */
+	private static void printData(Map<String, String> pvData) {
+		System.out.print(pvData.get("timestamp"));
+		System.out.print(",");
+		System.out.print(pvData.get("serialnumber"));
+		System.out.print(",");
+		System.out.print(pvData.get("firmware_version_main"));
+		System.out.print(",");
+		System.out.print(pvData.get("firmware_version_slave"));
+		System.out.print(",");
+		System.out.print(pvData.get("inverter_model"));
+		System.out.print(",");
+		System.out.print(pvData.get("inverter_ratedpower"));
+		System.out.print(",");		
+		System.out.print(pvData.get("yield_today"));
+		System.out.print(",");
+		System.out.print(pvData.get("yield_total"));
+		System.out.print(",");
+		System.out.print(pvData.get("hours_total"));
+		System.out.print(",");
+		System.out.print(pvData.get("temp"));
+		System.out.print(",");
+		System.out.print(pvData.get("vpv1"));
+		System.out.print(",");
+		System.out.print(pvData.get("vpv2"));
+		System.out.print(",");
+		System.out.print(pvData.get("vpv3"));
+		System.out.print(",");
+		System.out.print(pvData.get("ipv1"));
+		System.out.print(",");
+		System.out.print(pvData.get("ipv2"));
+		System.out.print(",");
+		System.out.print(pvData.get("ipv3"));
+		System.out.print(",");
+		System.out.print(pvData.get("iac1"));
+		System.out.print(",");
+		System.out.print(pvData.get("iac2"));
+		System.out.print(",");
+		System.out.print(pvData.get("iac3"));
+		System.out.print(",");
+		System.out.print(pvData.get("vac1"));
+		System.out.print(",");
+		System.out.print(pvData.get("vac2"));
+		System.out.print(",");
+		System.out.print(pvData.get("vac3"));
+		System.out.print(",");
+		System.out.print(pvData.get("fac1"));
+		System.out.print(",");
+		System.out.print(pvData.get("pac1"));
+		System.out.print(",");
+		System.out.print(pvData.get("fac2"));
+		System.out.print(",");
+		System.out.print(pvData.get("pac2"));
+		System.out.print(",");
+		System.out.print(pvData.get("fac3"));
+		System.out.print(",");
+		System.out.print(pvData.get("pac3"));
+		System.out.print(",");
+		System.out.print(stripNewlineCharacters(pvData.get("message")));
+		System.out.print(",");
+		System.out.print(pvData.get("alarms"));
+		System.out.print(",");
+		System.out.print(pvData.get("data_age"));
+		
+		System.out.println();
+	}
+	
+	/**
+	 * @param input
+	 * @return
+	 */
+	private static String stripNewlineCharacters(String input) {
+		if(input == null)
+			return null;
+		
+		return input.replace("\n", "").replace("\r", "");
+	}
+	
+	/**
+	 * @param args
+	 * @return
+	 * @throws ParseException
+	 */
+	@SuppressWarnings("static-access")
+	private static CommandLine parseCommandLine(String[] args) {
+		options = new Options();
+
+		Option option = OptionBuilder.withDescription("Print this help information.")
+				.withLongOpt("help").create("h");
+		options.addOption(option);
+
+		option = OptionBuilder.withArgName("poller|listener").hasArg()
+				.withDescription("The type of logger to use").isRequired()
+				.withLongOpt("type").create("t");
+		options.addOption(option);
+
+		option = OptionBuilder.withArgName("ip or hostname").hasArg()
 				.withDescription("The ip address or hostname of the inverter.")
 				.withLongOpt("address").create("a");
-
 		options.addOption(option);
 
 		option = OptionBuilder
@@ -33,51 +231,35 @@ public class PVDatalogger {
 				.withDescription(
 						"The polling interval in minutes. (Default is 5 minutes)")
 				.withLongOpt("interval").create("i");
+		options.addOption(option);
 
+		option = OptionBuilder
+				.withArgName("port")
+				.hasArg()
+				.withDescription(
+						"The port to listen on")
+				.withLongOpt("port").create("p");	
+		options.addOption(option);
+
+		option = OptionBuilder
+				.withArgName("address")
+				.hasArg()
+				.withDescription(
+						"The address of the interface to bind the listener to. Use 0.0.0.0 to bind to all interfaces")
+				.withLongOpt("bind").create("b");	
 		options.addOption(option);
 
 		CommandLineParser parser = new BasicParser();
-		CommandLine commandLine = parser.parse(options, args);
-
-		String address = "";
-		int pollingInterval = 5; // In minutes
-
-		if (commandLine.hasOption("a")) {
-			address = commandLine.getOptionValue("a");
-		} else {
+		CommandLine commandLine = null;
+		try {
+			commandLine = parser.parse(options, args);
+		} catch (ParseException e) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
 
 			System.exit(1);
 		}
-		if (commandLine.hasOption("p")) {
-			pollingInterval = Integer.valueOf(commandLine.getOptionValue("p"));
-		}
-
-		OmnikDataPoller datalogger = new OmnikDataPoller(address);
-
-		System.out.println("Starting Netty");
-		new OmnikDataListener(DEFAULT_LISTENER_PORT).run();
-		System.out.println("Netyy Run Ended"); 
-		 
-		while (true) {
-			Map<String, String> pvData = datalogger.retrieveData();
-
-			// Output the data
-			System.out.print(pvData.get("timestamp") + ",");
-			System.out.print(pvData.get("inverter_serialnumber") + ",");
-			System.out.print(pvData.get("firmware_version_main") + ",");
-			System.out.print(pvData.get("firmware_version_slave") + ",");
-			System.out.print(pvData.get("inverter_model") + ",");
-			System.out.print(pvData.get("inverter_ratedpower") + ",");
-			System.out.print(pvData.get("current_power") + ",");
-			System.out.print(pvData.get("yield_today") + ",");
-			System.out.print(pvData.get("yield_total") + ",");
-			System.out.print(pvData.get("alarms") + ",");
-			System.out.print(pvData.get("data_age"));
-			System.out.println();
-
-			Thread.sleep(pollingInterval * 60000);
-		}
+		
+		return commandLine;
 	}
 }

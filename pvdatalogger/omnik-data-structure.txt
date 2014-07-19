@@ -9,6 +9,9 @@ Possible start of message meaning (see https://github.com/micromys/Omnik/blob/ma
 4 bytes GEnerated ID ??
 4 bytes Generated ID ??
 
+LATEST DATA TIME (see screenshot in manual!)
+TEST MELDING 'Utility Loss'!!!
+
 HEX	DEC	LENGTH	DESCRIPTION
 00	000	[1]		Fixed value [68] (same as request message)	
 01	001	[14]	?? Altijd gelijk? [ 7d 41 b0 ce 1d 15 24 ce 1d 15 24 81 02 01 ]
