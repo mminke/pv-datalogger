@@ -71,7 +71,9 @@ public class OmnikDataListener {
 				byte[] output = bufferToByteArray(buffer, buffer.readableBytes());
 				String decodedValue = javax.xml.bind.DatatypeConverter
 						.printHexBinary(output);
-				LOG.error(decodedValue);					
+				LOG.error(decodedValue);
+				
+				return null;
 			}
 			
 			int messageVersion = buffer.getByte(1) & 0xFF; // messageVersion & 0xFF turns the signed byte into its unsigned value in a integer

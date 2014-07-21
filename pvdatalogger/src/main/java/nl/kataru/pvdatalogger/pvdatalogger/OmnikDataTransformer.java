@@ -81,14 +81,19 @@ public class OmnikDataTransformer {
 		
 	private BigDecimal transformShort( ByteBuffer byteBuffer, int offset, int divisor) {
 		short value = byteBuffer.getShort(offset);
-		
-		return new BigDecimal(value).divide(new BigDecimal(divisor));		
+		if( value == -1 )
+			return new BigDecimal(value);
+		else
+			return new BigDecimal(value).divide(new BigDecimal(divisor));		
 	}
 	
 	private BigDecimal transformInteger( ByteBuffer byteBuffer, int offset, int divisor) {
 		int value = byteBuffer.getInt(offset);
 		
-		return new BigDecimal(value).divide(new BigDecimal(divisor));		
+		if( value == -1 )
+			return new BigDecimal(value);
+		else
+			return new BigDecimal(value).divide(new BigDecimal(divisor));		
 	}
 	
 	private String transformToString( ByteBuffer byteBuffer, int offset, int size) {
