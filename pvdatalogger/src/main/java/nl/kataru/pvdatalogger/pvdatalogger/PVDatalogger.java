@@ -115,7 +115,8 @@ public class PVDatalogger {
 		OmnikDataListener listener = new OmnikDataListener(listenerBindingAddress, listenerPort);
 		listener.setTransformer(new OmnikDataTransformer());
 		listener.run( data -> printData(data) );
-		 
+		
+		Runtime.getRuntime().addShutdownHook(new StopListenerShutdownHook(listener));
 		while (true) {
 		}
 		

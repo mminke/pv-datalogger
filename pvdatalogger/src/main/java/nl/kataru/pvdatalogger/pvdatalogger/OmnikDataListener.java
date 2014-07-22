@@ -18,6 +18,8 @@ import org.apache.camel.impl.SimpleRegistry;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelDownstreamHandler;
+import org.jboss.netty.channel.ChannelStateEvent;
+import org.jboss.netty.channel.ChannelHandler.Sharable;
 import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelUpstreamHandler;
 import org.jboss.netty.handler.codec.frame.FrameDecoder;
@@ -43,16 +45,12 @@ public class OmnikDataListener {
 		this.listenerBindingAddress = listenerBindingAddress;
 
 		SimpleRegistry registry = new SimpleRegistry();
+		registry.put("omnikdecoder", new OmnikDecoder());
 
-		List<ChannelDownstreamHandler> encoders = new ArrayList<ChannelDownstreamHandler>();
-		List<ChannelUpstreamHandler> decoders = new ArrayList<ChannelUpstreamHandler>();
-		decoders.add(new OmnikDecoder());
-
-		registry.put("myEncoders", encoders);
-		registry.put("myDecoders", decoders);
 		context = new DefaultCamelContext(registry);
 	}
 
+	@Sharable
 	public class OmnikDecoder extends FrameDecoder {
 
 		protected Object decode(ChannelHandlerContext ctx, Channel channel,
@@ -126,6 +124,24 @@ public class OmnikDataListener {
 			}
 			return result;
 		}
+		
+		@Override
+		public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)
+				throws Exception {
+			
+			LOG.debug("Channel is closed");
+			super.channelClosed(ctx, e);
+		}
+		
+		@Override
+		public void channelDisconnected(ChannelHandlerContext ctx,
+				ChannelStateEvent e) throws Exception {
+			
+			LOG.debug("Channel is disconnected");
+			super.channelDisconnected(ctx, e);
+		}
+		
+		
 	}
 
 	/**
@@ -142,7 +158,7 @@ public class OmnikDataListener {
 			public void configure() {
 				from(
 						"netty:tcp://" + listenerBindingAddress + ":" + port
-								+ "?decoders=myDecoders&sync=false").setExchangePattern(ExchangePattern.InOnly).process(
+								+ "?decoder=#omnikdecoder&sync=false").setExchangePattern(ExchangePattern.InOnly).process(
 						new Processor() {
 							public void process(Exchange exchange)
 									throws Exception {

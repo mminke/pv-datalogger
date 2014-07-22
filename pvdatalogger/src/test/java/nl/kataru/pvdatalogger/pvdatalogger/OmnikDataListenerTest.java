@@ -26,7 +26,7 @@ public class OmnikDataListenerTest {
 		
 	/**
 	 * Test the listener functionality and check if a result is returned. No full transformation is tested because that is done in a separate test
-	 *  
+	 * 
 	 * @throws UnknownHostException
 	 * @throws IOException
 	 * @throws InterruptedException
