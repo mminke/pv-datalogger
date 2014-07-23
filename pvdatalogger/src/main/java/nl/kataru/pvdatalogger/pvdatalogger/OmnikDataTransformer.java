@@ -75,6 +75,7 @@ public class OmnikDataTransformer {
 		result.put("firmware_version_main", transformToString(byteBuffer, 97+offset, 15));
 		result.put("firmware_version_slave", transformToString(byteBuffer, 117+offset, 9));
 		result.put("message", transformToString(byteBuffer, 151+offset, 17));
+		result.put("rawdata", javax.xml.bind.DatatypeConverter.printHexBinary(rawData));
 
 		return result;
 	}

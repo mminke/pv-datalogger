@@ -18,7 +18,7 @@ import org.jboss.netty.logging.Slf4JLoggerFactory;
  * 
  */
 public class PVDatalogger {
-	private static final int DEFAULT_POLLING_INTERVAL = 5; //in minutes
+	private static final int DEFAULT_POLLING_INTERVAL = 5; // in minutes
 	private static final int DEFAULT_LISTENER_PORT = 9999;
 	private static final String DEFAULT_LISTENER_BINDING_ADDRESS = "0.0.0.0";
 	private static Options options;
@@ -29,12 +29,12 @@ public class PVDatalogger {
 	 */
 	public static void main(String[] args) throws Exception {
 		String type = "poller";
-		
+
 		// Enable Netty loggin
-		InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory());		
-		
+		InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory());
+
 		CommandLine commandLine = parseCommandLine(args);
-		
+
 		if (commandLine.hasOption("h")) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
@@ -43,36 +43,34 @@ public class PVDatalogger {
 		}
 		if (commandLine.hasOption("t")) {
 			type = commandLine.getOptionValue("t");
-			if( !("poller".equals(type) || "listener".equals(type))) {
+			if (!("poller".equals(type) || "listener".equals(type))) {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("pvdatalogger", options);
 
 				System.exit(-1);
 			}
-		}
-		else
-		{
+		} else {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
 
 			System.exit(-1);
 		}
-		
-		if( "poller".equals(type)) {
+
+		if ("poller".equals(type)) {
 			startPoller(commandLine);
-		}
-		else {
+		} else {
 			startListener(commandLine);
 		}
 	}
-	
+
 	/**
 	 * Start the logger as a data poller
 	 * 
 	 * @param commandLine
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
-	private static void startPoller(CommandLine commandLine) throws InterruptedException {
+	private static void startPoller(CommandLine commandLine)
+			throws InterruptedException {
 		String inverter_address = "";
 		int pollingInterval = DEFAULT_POLLING_INTERVAL;
 
@@ -84,17 +82,18 @@ public class PVDatalogger {
 		}
 
 		OmnikDataPoller datalogger = new OmnikDataPoller(inverter_address);
-		 
-		// TODO: Move while loop inside OmnikDataPoller which also uses Lambda to print the results
+
+		// TODO: Move while loop inside OmnikDataPoller which also uses Lambda
+		// to print the results
 		while (true) {
 			Map<String, String> pvData = datalogger.retrieveData();
 
-			printData(pvData);
+			printData(pvData, false);
 
 			Thread.sleep(pollingInterval * 60000);
 		}
 	}
-	
+
 	/**
 	 * Start the logger as a listener
 	 * 
@@ -102,6 +101,8 @@ public class PVDatalogger {
 	 */
 	private static void startListener(CommandLine commandLine) {
 		int listenerPort = DEFAULT_LISTENER_PORT;
+		final boolean printRawData;
+
 		String listenerBindingAddress = DEFAULT_LISTENER_BINDING_ADDRESS;
 
 		if (commandLine.hasOption("b")) {
@@ -110,23 +111,36 @@ public class PVDatalogger {
 		if (commandLine.hasOption("p")) {
 			listenerPort = Integer.valueOf(commandLine.getOptionValue("p"));
 		}
+		if (commandLine.hasOption("r")) {
+			printRawData = true;
+		}
+		else {
+			printRawData = false;
+		}
 
-		System.out.println("Listening on: " + listenerBindingAddress + ":" + listenerPort);
-		OmnikDataListener listener = new OmnikDataListener(listenerBindingAddress, listenerPort);
+		System.out.println("Listening on: " + listenerBindingAddress + ":"
+				+ listenerPort);
+		OmnikDataListener listener = new OmnikDataListener(
+				listenerBindingAddress, listenerPort);
 		listener.setTransformer(new OmnikDataTransformer());
-		listener.run( data -> printData(data) );
-		
-		Runtime.getRuntime().addShutdownHook(new StopListenerShutdownHook(listener));
+		listener.run(data -> printData(data, printRawData));
+
+		// Add a shutdown hook to gracefully shutdown when the application is
+		// interupted, eg. crtl-c is pressed
+		Runtime.getRuntime().addShutdownHook(
+				new StopListenerShutdownHook(listener));
 		while (true) {
 		}
-		
+
 	}
-	
+
 	/**
 	 * Output the data as a comma separated string to standard out
+	 * 
 	 * @param pvData
 	 */
-	private static void printData(Map<String, String> pvData) {
+	private static void printData(Map<String, String> pvData,
+			boolean printRawData) {
 		System.out.print(pvData.get("timestamp"));
 		System.out.print(",");
 		System.out.print(pvData.get("serialnumber"));
@@ -138,7 +152,7 @@ public class PVDatalogger {
 		System.out.print(pvData.get("inverter_model"));
 		System.out.print(",");
 		System.out.print(pvData.get("inverter_ratedpower"));
-		System.out.print(",");		
+		System.out.print(",");
 		System.out.print(pvData.get("yield_today"));
 		System.out.print(",");
 		System.out.print(pvData.get("yield_total"));
@@ -188,21 +202,25 @@ public class PVDatalogger {
 		System.out.print(pvData.get("alarms"));
 		System.out.print(",");
 		System.out.print(pvData.get("data_age"));
-		
+		if (printRawData) {
+			System.out.print(",");
+			System.out.print(pvData.get("rawdata"));
+		}
+
 		System.out.println();
 	}
-	
+
 	/**
 	 * @param input
 	 * @return
 	 */
 	private static String stripNewlineCharacters(String input) {
-		if(input == null)
+		if (input == null)
 			return null;
-		
+
 		return input.replace("\n", "").replace("\r", "");
 	}
-	
+
 	/**
 	 * @param args
 	 * @return
@@ -212,7 +230,8 @@ public class PVDatalogger {
 	private static CommandLine parseCommandLine(String[] args) {
 		options = new Options();
 
-		Option option = OptionBuilder.withDescription("Print this help information.")
+		Option option = OptionBuilder
+				.withDescription("Print this help information.")
 				.withLongOpt("help").create("h");
 		options.addOption(option);
 
@@ -234,12 +253,9 @@ public class PVDatalogger {
 				.withLongOpt("interval").create("i");
 		options.addOption(option);
 
-		option = OptionBuilder
-				.withArgName("port")
-				.hasArg()
-				.withDescription(
-						"The port to listen on")
-				.withLongOpt("port").create("p");	
+		option = OptionBuilder.withArgName("port").hasArg()
+				.withDescription("The port to listen on").withLongOpt("port")
+				.create("p");
 		options.addOption(option);
 
 		option = OptionBuilder
@@ -247,9 +263,13 @@ public class PVDatalogger {
 				.hasArg()
 				.withDescription(
 						"The address of the interface to bind the listener to. Use 0.0.0.0 to bind to all interfaces")
-				.withLongOpt("bind").create("b");	
+				.withLongOpt("bind").create("b");
 		options.addOption(option);
 
+		option = OptionBuilder.withDescription("Also print raw data as a hex string").withLongOpt("raw")
+				.create("r");
+		options.addOption(option);
+		
 		CommandLineParser parser = new BasicParser();
 		CommandLine commandLine = null;
 		try {
@@ -260,7 +280,7 @@ public class PVDatalogger {
 
 			System.exit(1);
 		}
-		
+
 		return commandLine;
 	}
 }
