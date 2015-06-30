@@ -15,7 +15,7 @@ import org.jboss.netty.logging.Slf4JLoggerFactory;
 
 /**
  * The main PVDatalogger class
- * 
+ *
  */
 public class PVDatalogger {
 	private static final int DEFAULT_POLLING_INTERVAL = 5; // in minutes
@@ -33,10 +33,10 @@ public class PVDatalogger {
 		// Enable Netty loggin
 		InternalLoggerFactory.setDefaultFactory(new Slf4JLoggerFactory());
 
-		CommandLine commandLine = parseCommandLine(args);
+		final CommandLine commandLine = parseCommandLine(args);
 
 		if (commandLine.hasOption("h")) {
-			HelpFormatter formatter = new HelpFormatter();
+			final HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
 
 			System.exit(0);
@@ -44,13 +44,13 @@ public class PVDatalogger {
 		if (commandLine.hasOption("t")) {
 			type = commandLine.getOptionValue("t");
 			if (!("poller".equals(type) || "listener".equals(type))) {
-				HelpFormatter formatter = new HelpFormatter();
+				final HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp("pvdatalogger", options);
 
 				System.exit(-1);
 			}
 		} else {
-			HelpFormatter formatter = new HelpFormatter();
+			final HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
 
 			System.exit(-1);
@@ -65,12 +65,11 @@ public class PVDatalogger {
 
 	/**
 	 * Start the logger as a data poller
-	 * 
+	 *
 	 * @param commandLine
 	 * @throws InterruptedException
 	 */
-	private static void startPoller(CommandLine commandLine)
-			throws InterruptedException {
+	private static void startPoller(CommandLine commandLine) throws InterruptedException {
 		String inverter_address = "";
 		int pollingInterval = DEFAULT_POLLING_INTERVAL;
 
@@ -81,12 +80,12 @@ public class PVDatalogger {
 			pollingInterval = Integer.valueOf(commandLine.getOptionValue("i"));
 		}
 
-		OmnikDataPoller datalogger = new OmnikDataPoller(inverter_address);
+		final OmnikDataPoller datalogger = new OmnikDataPoller(inverter_address);
 
 		// TODO: Move while loop inside OmnikDataPoller which also uses Lambda
 		// to print the results
 		while (true) {
-			Map<String, String> pvData = datalogger.retrieveData();
+			final Map<String, String> pvData = datalogger.retrieveData();
 
 			printData(pvData, false);
 
@@ -96,7 +95,7 @@ public class PVDatalogger {
 
 	/**
 	 * Start the logger as a listener
-	 * 
+	 *
 	 * @param commandLine
 	 */
 	private static void startListener(CommandLine commandLine) {
@@ -113,22 +112,19 @@ public class PVDatalogger {
 		}
 		if (commandLine.hasOption("r")) {
 			printRawData = true;
-		}
-		else {
+		} else {
 			printRawData = false;
 		}
 
-		System.out.println("Listening on: " + listenerBindingAddress + ":"
-				+ listenerPort);
-		OmnikDataListener listener = new OmnikDataListener(
-				listenerBindingAddress, listenerPort);
+		System.out.println("Listening on: " + listenerBindingAddress + ":" + listenerPort);
+		final OmnikDataListener listener = new OmnikDataListener(listenerBindingAddress, listenerPort);
 		listener.setTransformer(new OmnikDataTransformer());
 		listener.run(data -> printData(data, printRawData));
 
 		// Add a shutdown hook to gracefully shutdown when the application is
 		// interupted, eg. crtl-c is pressed
-		Runtime.getRuntime().addShutdownHook(
-				new StopListenerShutdownHook(listener));
+		// TODO: Change OmnikDataListener to implement java.lang.AutoCloseable and replace the shutdown hook with a try-with-resource statement
+		Runtime.getRuntime().addShutdownHook(new StopListenerShutdownHook(listener));
 		while (true) {
 		}
 
@@ -136,75 +132,74 @@ public class PVDatalogger {
 
 	/**
 	 * Output the data as a comma separated string to standard out
-	 * 
+	 *
 	 * @param pvData
 	 */
-	private static void printData(Map<String, String> pvData,
-			boolean printRawData) {
-		System.out.print(pvData.get("timestamp"));
+	private static void printData(Map<String, String> pvData, boolean printRawData) {
+		System.out.print(pvData.get("timestamp"));							// 1
 		System.out.print(",");
-		System.out.print(pvData.get("serialnumber"));
+		System.out.print(pvData.get("serialnumber"));						// 2
 		System.out.print(",");
-		System.out.print(pvData.get("firmware_version_main"));
+		System.out.print(pvData.get("firmware_version_main"));				// 3
 		System.out.print(",");
-		System.out.print(pvData.get("firmware_version_slave"));
+		System.out.print(pvData.get("firmware_version_slave"));				// 4
 		System.out.print(",");
-		System.out.print(pvData.get("inverter_model"));
+		System.out.print(pvData.get("inverter_model"));						// 5 <== only available when using the poller
 		System.out.print(",");
-		System.out.print(pvData.get("inverter_ratedpower"));
+		System.out.print(pvData.get("inverter_ratedpower"));				// 6 <== only available when using the poller
 		System.out.print(",");
-		System.out.print(pvData.get("yield_today"));
+		System.out.print(pvData.get("yield_today"));						// 7
 		System.out.print(",");
-		System.out.print(pvData.get("yield_total"));
+		System.out.print(pvData.get("yield_total"));						// 8
 		System.out.print(",");
-		System.out.print(pvData.get("hours_total"));
+		System.out.print(pvData.get("hours_total"));						// 9
 		System.out.print(",");
-		System.out.print(pvData.get("temp"));
+		System.out.print(pvData.get("temp"));								// 10
 		System.out.print(",");
-		System.out.print(pvData.get("vpv1"));
+		System.out.print(pvData.get("vpv1"));								// 11
 		System.out.print(",");
-		System.out.print(pvData.get("vpv2"));
+		System.out.print(pvData.get("vpv2"));								// 12
 		System.out.print(",");
-		System.out.print(pvData.get("vpv3"));
+		System.out.print(pvData.get("vpv3"));								// 13
 		System.out.print(",");
-		System.out.print(pvData.get("ipv1"));
+		System.out.print(pvData.get("ipv1"));								// 14
 		System.out.print(",");
-		System.out.print(pvData.get("ipv2"));
+		System.out.print(pvData.get("ipv2"));								// 15
 		System.out.print(",");
-		System.out.print(pvData.get("ipv3"));
+		System.out.print(pvData.get("ipv3"));								// 16
 		System.out.print(",");
-		System.out.print(pvData.get("iac1"));
+		System.out.print(pvData.get("iac1"));								// 17
 		System.out.print(",");
-		System.out.print(pvData.get("iac2"));
+		System.out.print(pvData.get("iac2"));								// 18
 		System.out.print(",");
-		System.out.print(pvData.get("iac3"));
+		System.out.print(pvData.get("iac3"));								// 19
 		System.out.print(",");
-		System.out.print(pvData.get("vac1"));
+		System.out.print(pvData.get("vac1"));								// 20
 		System.out.print(",");
-		System.out.print(pvData.get("vac2"));
+		System.out.print(pvData.get("vac2"));								// 21
 		System.out.print(",");
-		System.out.print(pvData.get("vac3"));
+		System.out.print(pvData.get("vac3"));								// 22
 		System.out.print(",");
-		System.out.print(pvData.get("fac1"));
+		System.out.print(pvData.get("fac1"));								// 23
 		System.out.print(",");
-		System.out.print(pvData.get("pac1"));
+		System.out.print(pvData.get("pac1"));								// 24
 		System.out.print(",");
-		System.out.print(pvData.get("fac2"));
+		System.out.print(pvData.get("fac2"));								// 25
 		System.out.print(",");
-		System.out.print(pvData.get("pac2"));
+		System.out.print(pvData.get("pac2"));								// 26
 		System.out.print(",");
-		System.out.print(pvData.get("fac3"));
+		System.out.print(pvData.get("fac3"));								// 27
 		System.out.print(",");
-		System.out.print(pvData.get("pac3"));
+		System.out.print(pvData.get("pac3"));								// 28
 		System.out.print(",");
-		System.out.print(stripNewlineCharacters(pvData.get("message")));
+		System.out.print(stripNewlineCharacters(pvData.get("message")));	// 29
 		System.out.print(",");
-		System.out.print(pvData.get("alarms"));
+		System.out.print(pvData.get("alarms"));								// 30 <== only available when using the poller
 		System.out.print(",");
-		System.out.print(pvData.get("data_age"));
+		System.out.print(pvData.get("data_age"));							// 31 <== only available when using the poller
 		if (printRawData) {
 			System.out.print(",");
-			System.out.print(pvData.get("rawdata"));
+			System.out.print(pvData.get("rawdata"));						// 32
 		}
 
 		System.out.println();
@@ -215,8 +210,9 @@ public class PVDatalogger {
 	 * @return
 	 */
 	private static String stripNewlineCharacters(String input) {
-		if (input == null)
+		if (input == null) {
 			return null;
+		}
 
 		return input.replace("\n", "").replace("\r", "");
 	}
@@ -230,52 +226,33 @@ public class PVDatalogger {
 	private static CommandLine parseCommandLine(String[] args) {
 		options = new Options();
 
-		Option option = OptionBuilder
-				.withDescription("Print this help information.")
-				.withLongOpt("help").create("h");
+		Option option = OptionBuilder.withDescription("Print this help information.").withLongOpt("help").create("h");
 		options.addOption(option);
 
-		option = OptionBuilder.withArgName("poller|listener").hasArg()
-				.withDescription("The type of logger to use").isRequired()
-				.withLongOpt("type").create("t");
+		option = OptionBuilder.withArgName("poller|listener").hasArg().withDescription("The type of logger to use").isRequired().withLongOpt("type").create("t");
 		options.addOption(option);
 
-		option = OptionBuilder.withArgName("ip or hostname").hasArg()
-				.withDescription("The ip address or hostname of the inverter.")
-				.withLongOpt("address").create("a");
+		option = OptionBuilder.withArgName("ip or hostname").hasArg().withDescription("The ip address or hostname of the inverter.").withLongOpt("address").create("a");
 		options.addOption(option);
 
-		option = OptionBuilder
-				.withArgName("minutes")
-				.hasArg()
-				.withDescription(
-						"The polling interval in minutes. (Default is 5 minutes)")
-				.withLongOpt("interval").create("i");
+		option = OptionBuilder.withArgName("minutes").hasArg().withDescription("The polling interval in minutes. (Default is 5 minutes)").withLongOpt("interval").create("i");
 		options.addOption(option);
 
-		option = OptionBuilder.withArgName("port").hasArg()
-				.withDescription("The port to listen on").withLongOpt("port")
-				.create("p");
+		option = OptionBuilder.withArgName("port").hasArg().withDescription("The port to listen on").withLongOpt("port").create("p");
 		options.addOption(option);
 
-		option = OptionBuilder
-				.withArgName("address")
-				.hasArg()
-				.withDescription(
-						"The address of the interface to bind the listener to. Use 0.0.0.0 to bind to all interfaces")
-				.withLongOpt("bind").create("b");
+		option = OptionBuilder.withArgName("address").hasArg().withDescription("The address of the interface to bind the listener to. Use 0.0.0.0 to bind to all interfaces").withLongOpt("bind").create("b");
 		options.addOption(option);
 
-		option = OptionBuilder.withDescription("Also print raw data as a hex string").withLongOpt("raw")
-				.create("r");
+		option = OptionBuilder.withDescription("Also print raw data as a hex string").withLongOpt("raw").create("r");
 		options.addOption(option);
-		
-		CommandLineParser parser = new BasicParser();
+
+		final CommandLineParser parser = new BasicParser();
 		CommandLine commandLine = null;
 		try {
 			commandLine = parser.parse(options, args);
-		} catch (ParseException e) {
-			HelpFormatter formatter = new HelpFormatter();
+		} catch (final ParseException e) {
+			final HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp("pvdatalogger", options);
 
 			System.exit(1);

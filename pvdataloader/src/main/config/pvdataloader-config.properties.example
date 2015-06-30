@@ -1,0 +1,2 @@
+pvdataloader.mongodb.server.url=localhost
+pvdataloader.mongodb.database.name=pvdata
