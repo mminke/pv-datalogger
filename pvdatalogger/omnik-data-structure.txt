@@ -1,12 +1,16 @@
-170 bytes
+170 bytes or 174 bytes depending on the firmware version!
 
-start bij 0!!!
+Due to the fact that I have had two inverters, the first one used 170 bytes, the second suddenly was 174 bytes.
+As far as I can see the discriminator is the byte at the second position (byte 01).
+For the 170 bytes message it contains 0x7d, for the 174 bytes message it has a value of 0x81
+
+start at 0!!!
 Short = 2 bytes
 Integer = 4 bytes
 
 Possible start of message meaning (see https://github.com/micromys/Omnik/blob/master/inverter_layout.html):
 4 bytes	HEADER ??
-4 bytes GEnerated ID ??
+4 bytes Generated ID ??
 4 bytes Generated ID ??
 
 LATEST DATA TIME (see screenshot in manual!)
@@ -14,7 +18,8 @@ TEST MELDING 'Utility Loss'!!!
 
 HEX	DEC	LENGTH	DESCRIPTION
 00	000	[1]		Fixed value [68] (same as request message)	
-01	001	[14]	?? Altijd gelijk? [ 7d 41 b0 ce 1d 15 24 ce 1d 15 24 81 02 01 ]
+01	001	[1]		Message version 7D or 81 hex
+02  002	[13]	Always the same for messages from the same firmware version for version 7D: [ 41 b0 ce 1d 15 24 ce 1d 15 24 81 02 01 ], for version 81: [ 41 B0 9D 8B 75 5F 9D 8B 75 5F 81 02 01 ]
 0F	015	[15]	Inverter Serial Number
 1F	031	[2]		Temperature
 21	033	[2]		vpv1
