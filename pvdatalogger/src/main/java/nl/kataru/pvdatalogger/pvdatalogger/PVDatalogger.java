@@ -12,12 +12,16 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.jboss.netty.logging.InternalLoggerFactory;
 import org.jboss.netty.logging.Slf4JLoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The main PVDatalogger class
  *
  */
 public class PVDatalogger {
+	private static final Logger log = LoggerFactory.getLogger(PVDatalogger.class);
+
 	private static final int DEFAULT_POLLING_INTERVAL = 5; // in minutes
 	private static final int DEFAULT_LISTENER_PORT = 9999;
 	private static final String DEFAULT_LISTENER_BINDING_ADDRESS = "0.0.0.0";
@@ -116,7 +120,7 @@ public class PVDatalogger {
 			printRawData = false;
 		}
 
-		System.out.println("Listening on: " + listenerBindingAddress + ":" + listenerPort);
+		log.info("Listening on: " + listenerBindingAddress + ":" + listenerPort);
 		final OmnikDataListener listener = new OmnikDataListener(listenerBindingAddress, listenerPort);
 		listener.setTransformer(new OmnikDataTransformer());
 		listener.run(data -> printData(data, printRawData));
