@@ -8,6 +8,59 @@ In 2014 I installed my own solar panels and now I want to have my own control ov
 
 My inverter is a OmnikSol 2.0k and I have a Wifi kit installed to remotely retrieve the data.
 
+# Usage
+
+Currently two separate tools exist.
+
+1. One tool (pvdatalogger) for polling the inverter or listening to inverter pushed data and which outputs a CSV line per received message to standard out.
+2. One tool (pvdataloader) for reading standard input, expecting a CSV file which was produced in step 1, and which stores this data in a MongoDB database.
+
+
+## Usage of pvdatalogger
+
+```
+usage: pvdatalogger
+ -a,--address <ip or hostname>   The ip address or hostname of the
+                                 inverter.
+ -b,--bind <address>             The address of the interface to bind the
+                                 listener to. Use 0.0.0.0 to bind to all
+                                 interfaces
+ -h,--help                       Print this help information.
+ -i,--interval <minutes>         The polling interval in minutes. (Default
+                                 is 5 minutes)
+ -p,--port <port>                The port to listen on
+ -r,--raw                        Also print raw data as a hex string
+ -t,--type <poller|listener>     The type of logger to use
+```
+For poller mode use the -a and -i options.
+For listener mode use the -b and -p options
+
+## Usage of pvdataloader
+```
+usage: pvdatalogger
+ -a,--address <address>     The MongoDB database address (default is
+                            localhost).
+ -d,--database <database>   The MongoDB database name in which all data is
+                            stored (default is pvdata).
+ -h,--help                  Print this help information.
+ -p,--port <port>           The MongoDB database port (default is 27017).
+```
+If MongoDB is installed on the local machine with the default port, no parameters need to be passed to the data loader because of the default settings.
+
+## Glueing the logger and loader together
+
+To connect the pvdatalogger and the pvdataloader together, the output of the logger needs to be redirected to the input of the pvdataloader. Different ways to do this exist, but a simple example is:
+
+
+```
+java -jar pvdatalogger-0.0.1-SNAPSHOT-jar-with-dependencies.jar -r -t listener 1>> pvdata.log 2>> pvdatalogger.error.log &
+java -jar pvdataloader-0.0.1-SNAPSHOT-jar-with-dependencies.jar < pvdata.log >> pvdataloader.error.log &
+```
+The first command will let the logger write all data to a text file called pvdata.log. Errors are output to pvdatalogger.error.log.
+The second command will start the loader and uses the pvdata.log file as the input. All output is directed to the pvdataloader.error.log file. A MongoDB server is expected to run and listening at localhost port 27017.
+
+# OmnikSol Data format
+
 Not much information is available on the dataoutput of this inverter. But looking at a few other projects (see also https://github.com/Woutrrr/Omnik-Data-Logger) I did manage to define a few datastructures. The txt files in this project contain information on the dataformats used, for those interested!
 
 Currently there is one project which contains a datalogger which still polls a javascript file from the inverters internal webpage. However, I started coding a small server listening to the pushed data from the inverter.
