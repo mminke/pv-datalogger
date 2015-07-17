@@ -52,13 +52,17 @@ public class PVDataLoader {
 
 		// Try with resource to force resource cleanup
 		try (Scanner scanIn = new Scanner(System.in)) {
-			while (true) {
+
+			while (scanIn.hasNext()) {
 				final String input = scanIn.nextLine();
 
-				final DBObject pvData = transformer.transform(input);
-				// Save the data
-				dataRepository.save(pvData);
+				try {
+					final DBObject pvData = transformer.transform(input);
 
+					dataRepository.save(pvData);
+				} catch (final IllegalArgumentException exception) {
+					System.err.println("WARNING: Input data ignored. Could not parse data: " + input);
+				}
 			}
 		}
 	}
