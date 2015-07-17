@@ -16,7 +16,7 @@ import com.mongodb.DBObject;
  *
  */
 public class CSVDataTransformer {
-	private static final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+	private final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
 
 	/**
 	 * Transform the given comma separated values (csv) input into a DBObject.

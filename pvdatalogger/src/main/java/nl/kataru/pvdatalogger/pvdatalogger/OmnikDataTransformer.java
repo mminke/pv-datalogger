@@ -16,7 +16,7 @@ import java.util.Map;
  *
  */
 public class OmnikDataTransformer {
-	private static final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+	private final DateFormat isoDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
 
 	public Map<String, String> transform(byte[] rawData) {
 		if (rawData[0] != 0x68) {
