@@ -40,9 +40,9 @@ public class CSVDataTransformerTest {
 
 		Assert.assertNotNull(result.get("totals"));
 		final DBObject totalsData = (DBObject) result.get("totals");
-		Assert.assertEquals(9.21F, totalsData.get("yield_today"));
-		Assert.assertEquals(2320.6F, totalsData.get("yield_total"));
-		Assert.assertEquals(4076F, totalsData.get("hours_total"));
+		Assert.assertEquals(9.21, totalsData.get("yield_today"));
+		Assert.assertEquals(2320.6, totalsData.get("yield_total"));
+		Assert.assertEquals(4076.0, totalsData.get("hours_total"));
 
 		Assert.assertNotNull(result.get("groups"));
 		final List groups = (List) result.get("groups");
@@ -51,16 +51,16 @@ public class CSVDataTransformerTest {
 		final DBObject group1 = (DBObject) groups.get(0);
 		Assert.assertNotNull(group1);
 		Assert.assertEquals(1, group1.get("groupNumber"));
-		Assert.assertEquals(253.4F, group1.get("vpv"));
-		Assert.assertEquals(0.1F, group1.get("ipv"));
-		Assert.assertEquals(0.1F, group1.get("iac"));
-		Assert.assertEquals(230.4F, group1.get("vac"));
-		Assert.assertEquals(50.03F, group1.get("fac"));
-		Assert.assertEquals(22.0F, group1.get("pac"));
+		Assert.assertEquals(253.4, group1.get("vpv"));
+		Assert.assertEquals(0.1, group1.get("ipv"));
+		Assert.assertEquals(0.1, group1.get("iac"));
+		Assert.assertEquals(230.4, group1.get("vac"));
+		Assert.assertEquals(50.03, group1.get("fac"));
+		Assert.assertEquals(22.0, group1.get("pac"));
 
 		Assert.assertNotNull(result.get("system"));
 		final DBObject systemData = (DBObject) result.get("system");
-		Assert.assertEquals(28.3F, systemData.get("temp"));
+		Assert.assertEquals(28.3, systemData.get("temp"));
 		Assert.assertEquals("DATA SEND IS OK", systemData.get("message"));
 		Assert.assertEquals(null, systemData.get("alarms"));
 		Assert.assertEquals(null, systemData.get("data_age"));

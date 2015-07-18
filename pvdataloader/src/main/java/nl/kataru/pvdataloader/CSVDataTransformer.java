@@ -53,9 +53,9 @@ public class CSVDataTransformer {
 			pvData.put("inverter", inverter);
 
 			final DBObject totals = new BasicDBObject();
-			totals.put("yield_today", Float.parseFloat(rawdata[6]));
-			totals.put("yield_total", Float.parseFloat(rawdata[7]));
-			totals.put("hours_total", Float.parseFloat(rawdata[8]));
+			totals.put("yield_today", Double.parseDouble(rawdata[6]));
+			totals.put("yield_total", Double.parseDouble(rawdata[7]));
+			totals.put("hours_total", Double.parseDouble(rawdata[8]));
 			pvData.put("totals", totals);
 
 			final BasicDBList groups = new BasicDBList();
@@ -65,7 +65,7 @@ public class CSVDataTransformer {
 			pvData.put("groups", groups);
 
 			final DBObject system = new BasicDBObject();
-			system.put("temp", Float.parseFloat(rawdata[9]));
+			system.put("temp", Double.parseDouble(rawdata[9]));
 			system.put("message", rawdata[28]);
 			if (!rawdata[29].equals("null")) {
 				system.put("alarms", rawdata[29]);
@@ -100,12 +100,12 @@ public class CSVDataTransformer {
 	private DBObject createGroup(int groupNumber, String vpv, String ipv, String iac, String vac, String fac, String pac) {
 		final DBObject group = new BasicDBObject();
 		group.put("groupNumber", groupNumber);
-		group.put("vpv", Float.parseFloat(vpv));
-		group.put("ipv", Float.parseFloat(ipv));
-		group.put("iac", Float.parseFloat(iac));
-		group.put("vac", Float.parseFloat(vac));
-		group.put("fac", Float.parseFloat(fac));
-		group.put("pac", Float.parseFloat(pac));
+		group.put("vpv", Double.parseDouble(vpv));
+		group.put("ipv", Double.parseDouble(ipv));
+		group.put("iac", Double.parseDouble(iac));
+		group.put("vac", Double.parseDouble(vac));
+		group.put("fac", Double.parseDouble(fac));
+		group.put("pac", Double.parseDouble(pac));
 
 		return group;
 	}
