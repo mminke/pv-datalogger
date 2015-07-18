@@ -60,8 +60,9 @@ public class PVDataLoader {
 					final DBObject pvData = transformer.transform(input);
 
 					dataRepository.save(pvData);
-				} catch (final IllegalArgumentException exception) {
+				} catch (final TransformException exception) {
 					System.err.println("WARNING: Input data ignored. Could not parse data: " + input);
+					System.err.println("\tMessage is: " + exception.getMessage());
 				}
 			}
 		}
