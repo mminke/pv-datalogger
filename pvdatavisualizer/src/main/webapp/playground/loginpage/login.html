@@ -1,0 +1,51 @@
+<html class="no-js" lang="" ng-app="userLogin">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>testEnvironment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+      [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {display: none !important;}
+    </style>
+    <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  </head>
+  <body ng-controller="loginCtrl">
+    
+    <div class="login" ng-click="hideUnhide()">
+      Log In
+    </div>
+    <div class="loginDialog">
+      <h2>Login Here</h2>
+      <p>Enter your username and password.</p>
+      <div class="failure">The username or password were incorrect. Please try again.</div>
+      <form ng-submit="loginFunction(inputName, inputPass)">
+        <div class="label">Username:</div>
+        <input type="text" ng-model='inputName' name="username">
+        <div class="label">Password:</div>
+        <input type="password" ng-model='inputPass' name="password">
+        <input type="submit" value="Submit">
+      </form>
+    </div>
+    
+    <div class="loggedIn">
+      <div class="lHeader">{{currentUser.name}}</div>
+      <div class="lInfo" ng-view>
+        <h3>Your Information</h3>
+        <ul>
+          <li>Your Name: {{currentUser.name}}</li>
+          <li>Your Age: {{currentUser.age}}</li>
+          <li>Your Username: {{currentUser.username}}</li>
+          <li>Your Password: {{currentUser.password}}</li>
+          <li>Your Homepage: <a ng-href="{{currentUser.homepage.url}}" target="_blank">{{currentUser.homepage.name}}</a></li>
+        </ul>
+      </div>
+      <div class="lFoods">
+        <h3>Some Foods You Like</h3>
+        <ul>
+          <li ng-repeat="food in currentUser.foods | orderBy">{{food}}</li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>

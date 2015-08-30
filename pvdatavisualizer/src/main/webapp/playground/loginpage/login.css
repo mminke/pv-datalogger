@@ -1,0 +1,94 @@
+body{
+  font-family: Tahoma, Verdana;
+  margin: 0;
+}
+.login{
+  width: 300px; 
+  margin: 10px auto;
+  background-color: #0FBD6F;
+  text-align: center;
+  box-shadow: 0px 0px 3px #333;
+  padding: 30px 0;
+  color: black;
+  font-weight: bold;
+  font-family: arial;
+  font-size: 30px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.loginDialog{
+  display: none;
+  margin: 10px auto;
+  width: 400px;
+  background-color: #f5f5f5;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 12px #aaa, 0px 0px 3px #333;
+  text-align: left;
+}
+h2{
+  margin: 0;
+  padding: 0;
+  line-height: 30px;
+  font-size: 22px;
+  border-bottom: 1px solid #333;
+  width: 100%;
+  text-align: center;
+  color: #555;
+}
+.label{
+  color: #555;
+  font-weight: bold;
+  line-height: 140%;
+}
+input{
+  clear: both;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 10px;
+  height: 36px;
+  line-height: 20px;
+  font-size: 16px;
+  color: #555;
+  border: none !important;
+  box-shadow: inset 1px 1px 6px #aaa;
+  border-radius: 3px;
+}
+input[type="submit"]{
+  margin-top: 15px;
+  box-shadow: inset -1px -1px 6px #aaa;
+  font-weight: bold;
+  height: 40px;
+  color: #555;
+}
+.failure{
+  display: none;
+  text-align: left;
+  font-weight: bold;
+  color: red; 
+  padding-bottom: 10px;
+}
+.loggedIn{
+  display: none;
+}
+.lHeader{
+  line-height: 50px; 
+  font-size: 36px;
+  box-sizing: border-box;
+  padding-left: 25px;
+  width: 100%;
+  background-color: #eee;
+  box-shadow: inset 0 0 15px #ccc;
+  font-weight: bold;
+  color: #555;
+}
+.lInfo, .lFoods{
+  float: left;
+  width: 50%;
+  box-sizing: border-box;
+  padding-left: 25px;
+  background-color: #eee;
+  box-shadow: inset 0 0 15px #ccc;
+  color: #555;
+  margin: 0;
+}

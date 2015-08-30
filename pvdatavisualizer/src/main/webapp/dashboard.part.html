@@ -1,0 +1,79 @@
+		
+		<div flex layout-padding layout-align="center">
+			<md-whiteframe class="md-whiteframe-z1" layout layout-align="center">
+				<div layout="column" layout-align="start" class="info">
+					<div layout="row" layout-align="start" class="info">
+						<div flex><label class="name">Inverter Type</label></div>
+						<div flex></div>
+						<div flex><label class="value">&nbsp;{{inverter.type}}</label></div>
+			        </div>
+					<div layout="row" layout-align="start" class="info">
+						<div flex><label class="name">Serial number</label></div>
+						<div flex></div>
+						<div flex><label class="value">&nbsp;{{inverter.serialnumber}}</label></div>
+			        </div>
+		        </div>
+			</md-whiteframe>
+		</div>
+
+	
+		<div layout-lg="column" layout-gt-lg="row" flex>
+			<div flex flex-gt-lg="25" layout-padding layout-align="center">
+				<md-whiteframe class="md-whiteframe-z1" layout layout-align="center">
+					<div layout="column" layout-align="start" class="info">
+							<label class="caption">Yield YtD</label>
+							<h1 class="md-display-3">{{actual.yield_ytd}} kWh</h1>
+							<md-progress-linear md-mode="determinate" value="{{calculated.progressToEstimatedValue}}"></md-progress-linear>
+							&nbsp;
+					</div>
+				</md-whiteframe>
+			</div>
+			<div layout-md="column" layout-gt-md="row" flex>
+				<div layout="row" flex>
+					<div flex layout-padding>
+						<md-whiteframe class="md-whiteframe-z1" layout flex layout-align="center">
+							<div layout="column" layout-align="start" class="info">
+								<label class="caption">Actual Power</label>
+								<h3 class="md-display-1">{{actual.power}} W</h3>
+							</div>
+						</md-whiteframe>
+					</div>
+					<div flex layout-padding>
+						<md-whiteframe class="md-whiteframe-z1" layout flex layout-align="center">
+							<div layout="column" layout-align="start" class="info">
+								<label class="caption">Yield Today</label>
+								<h3 class="md-display-1">{{actual.yield_today}} kWh</h3>
+							</div>
+						</md-whiteframe>
+					</div>
+				</div>
+				<div layout="row" flex>
+					<div flex layout-padding>
+						<md-whiteframe class="md-whiteframe-z1" layout flex layout-align="center">
+							<div layout="column" layout-align="start" class="info">
+								<label class="caption">Actual Panel Voltage</label>
+								<h3 class="md-display-1">{{actual.voltage}} V</h3>
+							</div>
+						</md-whiteframe>
+					</div>
+					<div flex layout-padding>
+						<md-whiteframe class="md-whiteframe-z1" layout flex layout-align="center">
+							<div layout="column" layout-align="start" class="info">
+								<label class="caption">Inverter Temperature</label>
+								<h3 class="md-display-1">{{actual.temperature}} ℃</h3>
+							</div>
+						</md-whiteframe>
+					</div>
+				</div>
+			</div>
+						
+		</div>
+	
+		<div flex layout-align="center end">
+			<md-toolbar>
+			<div class="md-toolbar-tools">
+				<label>1 minute ago</label>
+			</div>
+			</md-toolbar>
+		</div>
+		
