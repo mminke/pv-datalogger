@@ -45,7 +45,7 @@ public class MongoPVDataRepository implements PVDataRepository {
 
 			// create a unique index on the collection for the timestamp and serialnumber (each inverter should only log one item per time unit)
 			final DBCollection collection = database.getCollection(COLLECTION);
-			final DBObject index = new BasicDBObject().append("serialnumber", 1).append("timestamp", 1);
+			final DBObject index = new BasicDBObject().append("serialnumber", 1).append("timestamp", -1);
 			final DBObject constraints = new BasicDBObject("unique", true);
 			collection.createIndex(index, constraints);
 

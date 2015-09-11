@@ -30,6 +30,7 @@ public class MongoDBProducer {
 
 	@PostConstruct
 	public void init() throws UnknownHostException {
+		System.out.println("=====================Creates database");
 		final MongoClientURI uri = mongoClientURI;
 		mongoClient = new MongoClient(uri);
 		databbase = mongoClient.getDatabase(uri.getDatabase());
@@ -42,8 +43,7 @@ public class MongoDBProducer {
 	}
 
 	@Produces
-	public MongoDatabase createDB() {
-		System.out.println("=====================Creates database");
+	public MongoDatabase getDB() {
 		return databbase;
 	}
 

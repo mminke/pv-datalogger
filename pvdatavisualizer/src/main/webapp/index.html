@@ -1,10 +1,11 @@
 <html lang="en" ng-app="PVDataApp">
 <head>
-<meta charset="UTF-8">
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
-<meta name="viewport" content="initial-scale=1" />
 
+	<meta charset="UTF-8">
+		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
+	<meta name="viewport" content="initial-scale=1" />
+	
 <style>
 .md-toolbar-tools h1 {
 	font-size: inherit;
@@ -116,10 +117,10 @@
 		}
 			
 		function refreshData($scope, $http, $q) {
-			var inverter_serialnumber = "[[YOUR SERIAL NUMBER]]";
+			var inverter_serialnumber = "NLDN2020145H2050";
 				
-			var inverter_promise = $http.get("http://localhost:8080/pvdatavisualizer/api/inverters/" + inverter_serialnumber);
-			var actualdata_promise = $http.get("http://localhost:8080/pvdatavisualizer/api/inverters/" + inverter_serialnumber + "/data/actual");
+			var inverter_promise = $http.get("api/inverters/" + inverter_serialnumber);
+			var actualdata_promise = $http.get("api/inverters/" + inverter_serialnumber + "/data/actual");
 			
 			// After all data is loaded, do some calculations
 			$q.all([inverter_promise, actualdata_promise]).then(function(promiseresults){

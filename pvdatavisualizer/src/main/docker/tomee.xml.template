@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tomee>
+	<!-- see http://tomee.apache.org/containers-and-resources.html -->
+
+	<Resource id="mongoClientURI" class-name="com.mongodb.MongoClientURI"
+		constructor="uri">
+		uri MONGODB_SERVER_URL
+	</Resource>
+	
+</tomee>

@@ -1,0 +1,11 @@
+<project name="PVData Visualizer">
+    <bannerLeft>
+        <name>PVData Visualizer</name>
+    </bannerLeft>
+    <body>
+        <menu name="PVData Visualizer">
+            <item name="Overview" href="index.html"/>
+        </menu>
+        <menu ref="reports"/>
+    </body>
+</project>
