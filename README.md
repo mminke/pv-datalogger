@@ -8,12 +8,19 @@ In 2014 I installed my own solar panels and now I want to have my own control ov
 
 My inverter is a OmnikSol 2.0k and I have a Wifi kit installed to remotely retrieve the data.
 
+
+
 # Usage
 
-Currently two separate tools exist.
+The complete datalogger consists of three parts.
 
 1. One tool (pvdatalogger) for polling the inverter or listening to inverter pushed data and which outputs a CSV line per received message to standard out.
 2. One tool (pvdataloader) for reading standard input, expecting a CSV file which was produced in step 1, and which stores this data in a MongoDB database.
+3. One web application (pvdatavisualizer) which uses the MongoDB database to present the data in a responsive web design.
+
+Screenshot of the PVData Visualizer:
+
+![screenshot](pvdatavisualizer/src/site/resources/images/screenshot.png "Screenshot")
 
 
 ## Usage of pvdatalogger
