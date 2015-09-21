@@ -1,0 +1,6 @@
+language: java
+env:
+  - TEST_DIR=pvdatalogger
+  - TEST_DIR=pvdataloader
+  - TEST_DIR=pvdatavisualizer
+script: cd $TEST_DIR && mvn test
