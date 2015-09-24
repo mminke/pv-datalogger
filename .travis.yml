@@ -1,7 +1,6 @@
 language: java
 jdk:
   - oraclejdk8
-  - openjdk8
 env:
   - TEST_DIR=pvdatalogger
   - TEST_DIR=pvdataloader
