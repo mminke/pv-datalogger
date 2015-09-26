@@ -3,6 +3,8 @@
  */
 package nl.kataru.pvdata;
 
+import org.bson.Document;
+
 /**
  * @author morten
  *
@@ -27,5 +29,12 @@ public interface PVDataService {
 	 * @return The actual data of the inverter.
 	 */
 	String getActualData(String id);
+
+	/**
+	 * Save the inverter in persistent storage, so it can be retrieved later on.
+	 *
+	 * @param newInverter
+	 */
+	void saveInverter(Document newInverter);
 
 }

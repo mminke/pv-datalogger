@@ -42,6 +42,13 @@ public class PVDataServiceImpl implements PVDataService {
 	}
 
 	@Override
+	public void saveInverter(Document newInverter) {
+		final MongoCollection<Document> dbCollection = mongoDb.getCollection("inverters");
+
+		dbCollection.insertOne(newInverter);
+	}
+
+	@Override
 	public String getActualData(String id) {
 		final Document inverterData = getLastInverterData(id);
 
@@ -62,6 +69,7 @@ public class PVDataServiceImpl implements PVDataService {
 		final Document system = (Document) inverterData.get("system");
 
 		final Document actualData = new Document();
+		actualData.put("timestamp", inverterData.get("timestamp"));
 		actualData.put("yield_std", totals.get("yield_total"));
 		actualData.put("yield_ytd", (Double) totals.get("yield_total") - (Double) firstInverterDataForYearTotals.get("yield_total"));
 		actualData.put("yield_today", totals.get("yield_today"));
