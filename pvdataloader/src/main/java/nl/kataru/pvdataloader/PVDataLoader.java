@@ -1,128 +1,86 @@
 package nl.kataru.pvdataloader;
 
-import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.stream.Stream;
 
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.io.input.Tailer;
+import org.apache.commons.io.input.TailerListenerAdapter;
 
 import com.mongodb.DBObject;
 
 /**
- * Main class which parses the program arguments, initializes a mongo db client and then listens to standard input for csv data.
+ * The PVDataLoader initializes a mongo db repository and then whatches the given file for input.
  * Each line of csv data is transformed into a JSON object which is stored in the MongoDB database.
  */
 public class PVDataLoader {
-	private final PVDataRepository dataRepository;
-	private static String databaseAddress = "localhost";
-	private static int databasePort = 27017;
-	private static String databaseName = "pvdata";
+	private final Path inputfilePath;
 	private static final CSVDataTransformer transformer = new CSVDataTransformer();
 
-	public static void main(String[] args) throws UnknownHostException {
+	private final PVDataRepository dataRepository;
+	private final Mode mode;
 
-		parseCommandLine(args);
+	private int lineCounter = 0;
 
-		final PVDataLoader pvDataLoader = new PVDataLoader(databaseAddress, databasePort, databaseName);
-
-		pvDataLoader.start();
+	public enum Mode {
+		FOLLOW_OUTPUT, READ_UNTIL_EOF
 	}
 
-	private PVDataLoader(String databaseAddress, int databasePort, String databaseCollection) throws UnknownHostException {
-		// Load config file
+	public PVDataLoader(Path inputfilePath, Mode mode, PVDataRepository dataRepository) {
 
-		// Initialise DataRepository
-		dataRepository = new MongoPVDataRepository(databaseAddress, databasePort, databaseCollection);
+		this.dataRepository = dataRepository;
+
+		this.inputfilePath = inputfilePath;
+		this.mode = mode;
 
 		// Add a shutdown hook to gracefully shutdown when the application is
 		// interupted, eg. crtl-c is pressed
 		// TODO: Change PVDataRepository to implement java.lang.AutoCloseable
 		// and replace the shutdown hook with a try-with-resource statement
 		Runtime.getRuntime().addShutdownHook(new CleanShutdownHook(dataRepository));
-
-	}
-
-	private void start() {
-
-		// Try with resource to force resource cleanup
-		try (Scanner scanIn = new Scanner(System.in)) {
-
-			while (scanIn.hasNext()) {
-				final String input = scanIn.nextLine();
-
-				try {
-					final DBObject pvData = transformer.transform(input);
-
-					dataRepository.save(pvData);
-				} catch (final TransformException exception) {
-					System.err.println("WARNING: Input data ignored. Could not parse data: " + input);
-					System.err.println("\tMessage is: " + exception.getMessage());
-				}
-			}
-		}
 	}
 
 	/**
-	 * @param args
-	 * @return
-	 * @throws ParseException
+	 * Start reading the input file. Either follow the input (similar as tail -f) or stop after no more data is available.
 	 */
-	@SuppressWarnings("static-access")
-	private static void parseCommandLine(String[] args) {
-		// Setup the expected command line options
-		final Options options = new Options();
+	public void start() {
+		if (mode.equals(Mode.FOLLOW_OUTPUT)) {
+			final Tailer tailer = new Tailer(inputfilePath.toFile(), new PVDataFileTailerListener());
 
-		Option option = OptionBuilder.withDescription("Print this help information.").withLongOpt("help").create("h");
-		options.addOption(option);
-
-		option = OptionBuilder.withArgName("address").hasArg().withDescription("The MongoDB database address (default is localhost).").withLongOpt("address").create("a");
-		options.addOption(option);
-
-		option = OptionBuilder.withArgName("port").hasArg().withDescription("The MongoDB database port (default is 27017).").withLongOpt("port").create("p");
-		options.addOption(option);
-
-		option = OptionBuilder.withArgName("database").hasArg().withDescription("The MongoDB database name in which all data is stored (default is pvdata).").withLongOpt("database").create("d");
-		options.addOption(option);
-
-		// Parse the command line
-		final CommandLineParser parser = new BasicParser();
-		CommandLine commandLine = null;
-		try {
-			commandLine = parser.parse(options, args);
-		} catch (final ParseException e) {
-			final HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("pvdatalogger", options);
-
-			System.exit(1);
-		}
-
-		// Determine values of arguments
-		if (commandLine.hasOption("h")) {
-			final HelpFormatter formatter = new HelpFormatter();
-			formatter.printHelp("pvdatalogger", options);
-
-			System.exit(0);
-		}
-		if (commandLine.hasOption("a")) {
-			databaseAddress = commandLine.getOptionValue("a");
-		}
-		if (commandLine.hasOption("p")) {
-			try {
-				databasePort = Integer.parseInt(commandLine.getOptionValue("p"));
-			} catch (final RuntimeException exception) {
-				System.out.println("Could not parse the database port. Please specify a correct number");
-				System.exit(1);
+			tailer.run();
+		} else {
+			// The stream hence file will also be closed here
+			try (Stream<String> lines = Files.lines(inputfilePath)) {
+				final PVDataFileTailerListener pvDataInputListener = new PVDataFileTailerListener();
+				lines.forEach(line -> pvDataInputListener.handle(line));
+			} catch (final NoSuchFileException exception) {
+				System.err.println("File does not exist: " + exception.getMessage());
+			} catch (final IOException exception) {
+				System.err.println("Error reading input file: " + exception.getMessage());
 			}
-		}
-		if (commandLine.hasOption("d")) {
-			databaseName = commandLine.getOptionValue("d");
 		}
 	}
 
+	public int getLineCounter() {
+		return lineCounter;
+	}
+
+	public class PVDataFileTailerListener extends TailerListenerAdapter {
+		@Override
+		public void handle(String line) {
+			try {
+				// System.out.println("Processing data: " + line);
+				final DBObject pvData = transformer.transform(line);
+
+				dataRepository.save(pvData);
+				lineCounter++;
+			} catch (final TransformException exception) {
+				System.err.println("WARNING: Input data ignored. Could not parse data: " + line);
+				System.err.println("\tMessage is: " + exception.getMessage());
+			}
+		}
+
+	}
 }
