@@ -1,0 +1,13 @@
+		<div flex layout-padding layout-align="center">
+			<md-whiteframe class="md-whiteframe-z1" layout layout-align="center">
+				<div layout="column">
+					<div>Login</div>
+					<div ng-show="session.currentUser == null">Please login</div>
+					<div ng-show="session.currentUser != null">You are logged in as: {{session.currentUser}}</div>
+					<div>
+						<button ng-show="session.currentUser == null" ng-click="login()">Login</button>
+						<button ng-show="session.currentUser != null" ng-click="logout()">Logout</button>
+					</div>
+				</div>
+			</md-whiteframe>
+		</div>

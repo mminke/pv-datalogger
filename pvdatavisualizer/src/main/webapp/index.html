@@ -43,94 +43,54 @@
 }
 </style>
 </head>
-<body ng-controller="DashboardController">
+<body>
 
-		<md-toolbar>
-		<div class="md-toolbar-tools">
-			<md-button ng-click="toggleSidenav('leftsidenav')"> 
-				<md-icon aria-label="Menu" md-svg-icon="https://s3-us-west-2.amazonaws.com/s.cdpn.io/68133/menu.svg"></md-icon>
-			</md-button>
-			<h1>Solar Info</h1>
-		</div>
-		</md-toolbar>
-		
-		<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="leftsidenav">
-			<md-toolbar class="md-theme-light">
-				<h1 class="md-toolbar-tools">Sidenav Right</h1>
-			</md-toolbar>
-			<md-content layout-padding>
-				<form>
-					<md-input-container>
-						<label for="testInput">Test input</label>
-						<input type="text" id="testInput"
-						       ng-model="data" md-sidenav-focus>
-					</md-input-container>
-				</form>
-				<md-button ng-click="close()" class="md-primary">
-					Close Sidenav Right
-				</md-button>
-			</md-content>
-		 </md-sidenav>		
-		
-
-	<div ng-include="dashboard_url">
-	</div>		
+	<md-toolbar>
+	<div class="md-toolbar-tools">
+		<md-button ng-click="toggleSidenav('leftsidenav')"> 
+			<md-icon aria-label="Menu" md-svg-icon="https://s3-us-west-2.amazonaws.com/s.cdpn.io/68133/menu.svg"></md-icon>
+		</md-button>
+		<h1>Solar Info</h1>
+	</div>
+	</md-toolbar>
 	
+	<md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="leftsidenav">
+		<md-toolbar class="md-theme-light">
+			<h1 class="md-toolbar-tools">Sidenav Right</h1>
+		</md-toolbar>
+		<md-content layout-padding>
+			<form>
+				<md-input-container>
+					<label for="testInput">Test input</label>
+					<input type="text" id="testInput"
+					       ng-model="data" md-sidenav-focus>
+				</md-input-container>
+			</form>
+			<md-button ng-click="close()" class="md-primary">
+				Close Sidenav Right
+			</md-button>
+		</md-content>
+	 </md-sidenav>		
+		
+
+	<ng-view></ng-view>
+
+		
+	<!-- Angular Dependencies -->
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
+	<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.js"></script>
+	<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-aria.js"></script>
+	<script	src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+
 	<!-- Angular Material Dependencies -->
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.js"></script>
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.js"></script>
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-aria.js"></script>
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+	<script	src="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.js"></script>
 
-	<script
-		src="https://ajax.googleapis.com/ajax/libs/angular_material/0.9.4/angular-material.min.js"></script>
-
-	<script>
-		var app = angular.module('PVDataApp', [ 'ngMaterial','ngRoute' ]);
-		
-		app.controller('DashboardController', [
-   				'$scope',
-   				'$http',
-   				'$q',
-   				'$mdSidenav',
-   				'$interval',
-   				function($scope, $http, $q, $mdSidenav, $interval) {
-   					
-   					$scope.dashboard_url = "dashboard.part.html";
-   					$scope.login_url = "login.part.html";
-   					
-   					// Initialize the window with data
-   					refreshData($scope, $http, $q)
-   					
-   					// Setup refresh of the dashboard data every half minute
-   					$interval(function() { refreshData($scope, $http, $q) }, 30000); 					
-   				} ]);
-		
-		function calculate($scope) {
-			$scope.calculated = {
-					progressToEstimatedValue: ($scope.actual.yield_ytd / $scope.inverter.estimated_yearly_yield) * 100
-				};
-		}
-			
-		function refreshData($scope, $http, $q) {
-			var inverter_serialnumber = "NLDN2020145H2050";
-				
-			var inverter_promise = $http.get("api/inverters/" + inverter_serialnumber);
-			var actualdata_promise = $http.get("api/inverters/" + inverter_serialnumber + "/data/actual");
-			
-			// After all data is loaded, do some calculations
-			$q.all([inverter_promise, actualdata_promise]).then(function(promiseresults){
-	            $scope.inverter = promiseresults[0].data;
-				$scope.actual = promiseresults[1].data;
-				
-		        calculate($scope)  						
-			});   					
-			
-		}
-	</script>
+	<!-- Application Dependencies -->
+	<script src="scripts/app.js"></script>
+	<script src="scripts/loginservice.js"></script>
+	<script src="scripts/app-config.js"></script>
+	<script src="scripts/dashboardcontroller.js"></script>
+	<script src="scripts/logincontroller.js"></script>
+	
 </body>
 </html>
