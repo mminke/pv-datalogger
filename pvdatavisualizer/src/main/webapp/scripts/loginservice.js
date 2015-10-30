@@ -9,6 +9,7 @@ app.factory('loginService', ['$rootScope', function($rootScope) {
     	
     	login : function () {
     		this.session.currentUser = "Anonymous";
+    		return true;
     	},
     	logout : function () {
     		this.session.currentUser = null;

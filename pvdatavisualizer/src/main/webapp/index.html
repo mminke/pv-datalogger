@@ -43,7 +43,7 @@
 }
 </style>
 </head>
-<body>
+<body ng-controller="MainController">
 
 	<md-toolbar>
 	<div class="md-toolbar-tools">
@@ -51,6 +51,8 @@
 			<md-icon aria-label="Menu" md-svg-icon="https://s3-us-west-2.amazonaws.com/s.cdpn.io/68133/menu.svg"></md-icon>
 		</md-button>
 		<h1>Solar Info</h1>
+		&nbsp;|&nbsp;
+		<div ng-show="session.currentUser != null" ng-click="logout()">{{session.currentUser}}</div>
 	</div>
 	</md-toolbar>
 	
@@ -89,6 +91,7 @@
 	<script src="scripts/app.js"></script>
 	<script src="scripts/loginservice.js"></script>
 	<script src="scripts/app-config.js"></script>
+	<script src="scripts/maincontroller.js"></script>
 	<script src="scripts/dashboardcontroller.js"></script>
 	<script src="scripts/logincontroller.js"></script>
 	
