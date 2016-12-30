@@ -1,6 +1,3 @@
-/**
- * 
- */
 package nl.kataru.pvdatalogger.pvdatalogger;
 
 import java.util.Map;
@@ -24,13 +21,9 @@ public class OmnikDataTransformerTest {
 	private static final byte[] INVALID_DATA_WRONGMESSAGEVERSION = javax.xml.bind.DatatypeConverter.parseHexBinary("681d15248102014e4c444e32303230313339353330323701290a650000ffff000100b3ffff0002ffffffff0901ffffffff13890023ffffffffffffffff03f8000003a0000000a4000100000000ffff000000000000000000004e4c312d56312e302d303034332d34000000000056312e362d3030313800000000000000000000002016681141f0ce1d1524ce1d1524444154412053454e44204953204f4b0d0aae16");
 	private static final byte[] INVALID_DATA_WRONGMESSAGELENGTH = javax.xml.bind.DatatypeConverter.parseHexBinary("6881248102014e4c444e32303230313339353330323701290a650000ffff000100b3ffff0002ffffffff0901ffffffff13890023ffffffffffffffff03f8000003a0000000a4000100000000ffff000000000000000000004e4c312d56312e302d303034332d34000000000056312e362d3030313800000000000000000000002016681141f0ce1d1524ce1d1524444154412053454e44204953204f4b0d0aae16");
 	
-	// Helper member to check for certain exception messages
 	@Rule
 	public ExpectedException expectedEx = ExpectedException.none();
 
-	/**
-	 * 
-	 */
 	@Test
 	public void testValidTransformationWithMessageVersion7D()
 	{
@@ -97,10 +90,6 @@ public class OmnikDataTransformerTest {
 		Assert.assertEquals("DATA SEND IS OK\r\n", result.get("message"));
 	}
 
-	
-	/**
-	 * 
-	 */
 	@Test
 	public void testValidTransformationWithMessageVersion81()
 	{
@@ -169,9 +158,6 @@ public class OmnikDataTransformerTest {
 		Assert.assertEquals("DATA SEND IS OK\r\n", result.get("message"));
 	}
 
-	/**
-	 * 
-	 */
 	@Test
 	public void testWrongMessageStartTransformation()
 	{
@@ -183,9 +169,6 @@ public class OmnikDataTransformerTest {
 		transformer.transform(INVALID_DATA_WRONGMESSAGESTART);
 	}
 	
-	/**
-	 * 
-	 */
 	@Test
 	public void testWrongMessageVersionTransformation()
 	{
@@ -197,9 +180,6 @@ public class OmnikDataTransformerTest {
 		transformer.transform(INVALID_DATA_WRONGMESSAGEVERSION);
 	}
 
-	/**
-	 * 
-	 */
 	@Test
 	public void testWrongMessageLengteTransformation()
 	{
