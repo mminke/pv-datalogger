@@ -1,22 +1,14 @@
-/**
- *
- */
 package nl.kataru.pvdata.ws.rest;
 
-import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import nl.kataru.pvdata.PVDataService;
 import org.bson.Document;
 
-import nl.kataru.pvdata.PVDataService;
+import javax.annotation.security.PermitAll;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * @author morten
@@ -27,14 +19,15 @@ import nl.kataru.pvdata.PVDataService;
 public class PVDataRestResource {
 
 	@Inject
-	PVDataService pvDataService;
+    private PVDataService pvDataService;
 
 	@GET
 	@Produces(MediaType.TEXT_PLAIN)
 	@Path("/inverters")
-	public String getInverter() {
-		return "Hello World: All";
-	}
+    @PermitAll
+    public String getInverters() {
+        return "Hello World: All";
+    }
 
 	// TODO: Create POST method to create new inverter documents in MongoDB
 
@@ -55,8 +48,8 @@ public class PVDataRestResource {
 	/**
 	 * Use POST to create a non idempotent method to create a new inverter.
 	 *
-	 * @param inverterId
-	 * @return
+     * @param input
+     * @return
 	 */
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)

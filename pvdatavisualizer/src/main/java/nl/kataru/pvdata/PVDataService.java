@@ -1,6 +1,3 @@
-/**
- *
- */
 package nl.kataru.pvdata;
 
 import org.bson.Document;
@@ -32,6 +29,13 @@ public interface PVDataService {
 
 	/**
 	 * Save the inverter in persistent storage, so it can be retrieved later on.
+	 *
+	 * format:
+	 * {
+	 * 	   serialnumber;
+	 * 	   type;
+	 *     estimated_yearly_yield;
+	 * }
 	 *
 	 * @param newInverter
 	 */
