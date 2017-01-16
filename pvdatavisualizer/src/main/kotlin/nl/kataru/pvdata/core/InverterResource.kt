@@ -1,5 +1,6 @@
-import nl.kataru.pvdata.domain.Account
-import nl.kataru.pvdata.domain.Inverter
+package nl.kataru.pvdata.core
+
+import nl.kataru.pvdata.accounts.Account
 import javax.inject.Inject
 import javax.ws.rs.*
 import javax.ws.rs.container.ContainerRequestContext
@@ -14,7 +15,7 @@ import javax.ws.rs.core.Response
 open class InverterResource {
 
     @Inject
-    lateinit internal var inverterService: InverterService
+    lateinit private var inverterService: InverterService
 // This does not work:
 //    @Context
 //    lateinit internal var requestContext: ContainerRequestContext
@@ -82,7 +83,7 @@ open class InverterResource {
 //class MyApplication : Application() {
 //    override fun getClasses(): MutableSet<Class<*>>? {
 //        val classes = HashSet<Class<*>>()
-//        classes.add(InverterResource::class.java)
+//        classes.add(nl.kataru.pvdata.core.InverterResource::class.java)
 //        return classes
 //    }
 //}

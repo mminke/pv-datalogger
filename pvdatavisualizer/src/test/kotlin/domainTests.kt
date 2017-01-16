@@ -1,5 +1,6 @@
 package nl.kataru.pvdata.domain
 
+import nl.kataru.pvdata.core.Inverter
 import org.junit.Test
 import kotlin.test.assertEquals
 

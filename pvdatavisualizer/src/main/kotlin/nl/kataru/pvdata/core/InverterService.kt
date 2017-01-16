@@ -1,15 +1,20 @@
+package nl.kataru.pvdata.core
+
 import com.mongodb.client.MongoDatabase
-import nl.kataru.pvdata.domain.Account
-import nl.kataru.pvdata.domain.Inverter
+import nl.kataru.pvdata.accounts.Account
 import org.bson.Document
 import java.util.*
 import javax.inject.Inject
 
 open class InverterService {
-    internal val COLLECTION_INVERTERS = "inverters"
+    private val COLLECTION_INVERTERS = "inverters"
+
+    private var mongoDatabase: MongoDatabase
 
     @Inject
-    lateinit internal var mongoDatabase: MongoDatabase
+    constructor(mongoDatabase: MongoDatabase) {
+        this.mongoDatabase = mongoDatabase
+    }
 
     /**
      * Create a new inverter entry in persistent storage.

@@ -1,4 +1,6 @@
-import nl.kataru.pvdata.domain.Account
+package nl.kataru.pvdata.accounts
+
+import nl.kataru.pvdata.security.AccountPrincipal
 import javax.annotation.security.PermitAll
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -14,10 +16,10 @@ import javax.ws.rs.core.SecurityContext
 open class AccountResource() {
 
     @Inject
-    lateinit internal var accountService: AccountService
+    lateinit private var accountService: AccountService
 
     @Context
-    lateinit internal var securityContext: SecurityContext
+    lateinit private var securityContext: SecurityContext
 //    @Context
 //    lateinit internal var requestContext: ContainerRequestContext
 
@@ -43,7 +45,7 @@ open class AccountResource() {
     fun getSingle(@PathParam("id") id: String): Response {
         val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
 
-        val account = accountService.findById(id)
+        val account = accountService.findByIdUsingAccount(id, accountPrincipal.account)
         val response = account.map { Response.ok(it) }.orElse(Response.status(Response.Status.NOT_FOUND))
         return response.build()
     }
@@ -91,7 +93,7 @@ open class AccountResource() {
 //class MyApplication : Application() {
 //    override fun getClasses(): MutableSet<Class<*>>? {
 //        val classes = HashSet<Class<*>>()
-//        classes.add(InverterResource::class.java)
+//        classes.add(nl.kataru.pvdata.core.InverterResource::class.java)
 //        return classes
 //    }
 //}
