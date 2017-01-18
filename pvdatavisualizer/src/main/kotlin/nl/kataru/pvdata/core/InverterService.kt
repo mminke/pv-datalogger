@@ -44,6 +44,22 @@ open class InverterService {
         throw UnsupportedOperationException("Not yet implemented")
     }
 
+
+    fun findAllUsingAccount(account: Account): Set<Inverter> {
+        val results = HashSet<Inverter>()
+        val collection = mongoDatabase.getCollection(COLLECTION_INVERTERS)
+
+        val query = Document()
+        query.append("owner", account.id)
+        val documents = collection!!.find(query)
+        for (document in documents) {
+            val inverter = transformToInverter(document)
+            results.add(inverter)
+        }
+        return results
+    }
+
+
     fun findByIdUsingAccount(id: String, account: Account): Optional<Inverter> {
         val collection = mongoDatabase.getCollection(COLLECTION_INVERTERS)
 
@@ -101,7 +117,7 @@ open class InverterService {
 
     fun transformToInverter(document: Document): Inverter {
         with(document) {
-            val id = getString("_id")
+            val id = getObjectId("_id").toString()
             val serialNumber = getString("serialnumber")
             val brand = getString("brand") ?: "Unknown"
             val type = getString("type") ?: "Unknown"

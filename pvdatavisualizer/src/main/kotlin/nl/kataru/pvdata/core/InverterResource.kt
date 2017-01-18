@@ -1,12 +1,12 @@
 package nl.kataru.pvdata.core
 
-import nl.kataru.pvdata.accounts.Account
+import nl.kataru.pvdata.security.AccountPrincipal
 import javax.inject.Inject
 import javax.ws.rs.*
-import javax.ws.rs.container.ContainerRequestContext
 import javax.ws.rs.core.Context
 import javax.ws.rs.core.MediaType
 import javax.ws.rs.core.Response
+import javax.ws.rs.core.SecurityContext
 
 /**
  *
@@ -16,26 +16,25 @@ open class InverterResource {
 
     @Inject
     lateinit private var inverterService: InverterService
-// This does not work:
-//    @Context
-//    lateinit internal var requestContext: ContainerRequestContext
+
+    @Context
+    lateinit private var securityContext: SecurityContext
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    fun getInverters(): Array<Inverter> {
-        return arrayOf(
-                Inverter("id1", "0123", "Brand1", "2000K", 2000, "account1"),
-                Inverter("id2", "4567", "Brand2", "2000K", 2000, "account1"),
-                Inverter("id3", "7890", "Brand3", "2000K", 2000, "account1"))
+    fun getInverters(): Set<Inverter> {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
+
+        return inverterService.findAllUsingAccount(accountPrincipal.account)
     }
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    fun getInverter(@Context requestContext: ContainerRequestContext, @PathParam("id") id: String): Response {
-        val account = requestContext.getProperty("account") as Account
+    fun getInverter(@PathParam("id") id: String): Response {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
 
-        val inverter = inverterService.findByIdUsingAccount(id, account)
+        val inverter = inverterService.findByIdUsingAccount(id, accountPrincipal.account)
 
         if (inverter.isPresent) {
             return Response.ok(inverter.get()).build()
@@ -46,9 +45,10 @@ open class InverterResource {
 
     @DELETE
     @Path("{id}")
-    fun deleteInverter(@Context requestContext: ContainerRequestContext, @PathParam("id") id: String): Response {
-        val account = requestContext.getProperty("account") as Account
-        if (inverterService.deleteWithIdUsingAccount(id, account)) {
+    fun deleteInverter(@PathParam("id") id: String): Response {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
+
+        if (inverterService.deleteWithIdUsingAccount(id, accountPrincipal.account)) {
             return Response.ok().build()
         } else {
             return Response.status(Response.Status.NOT_FOUND).build()
@@ -59,20 +59,23 @@ open class InverterResource {
     @Path("{serialNumber}")
     @Consumes(MediaType.APPLICATION_JSON)
     fun updateInverter(@PathParam("serialNumber") serialNumber: String, inverter: Inverter): String {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
+
         return "updated inverter with serial#: ${inverter.serialNumber}"
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
-    fun createInverter(@Context requestContext: ContainerRequestContext, inverter: Inverter): Response {
-        val account = requestContext.getProperty("account") as Account
+    @Produces(MediaType.APPLICATION_JSON)
+    fun createInverter(inverter: Inverter): Response {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
 
         try {
-            val createdInverter = inverterService.createUsingAccount(inverter, account)
+            val createdInverter = inverterService.createUsingAccount(inverter, accountPrincipal.account)
             return Response.ok("created inverter with id: ${createdInverter.id}").build()
         } catch (exception: IllegalArgumentException) {
             // An inverter with the given serialnumber already exists.
-            val error = Error(exception.message)
+            val error = nl.kataru.pvdata.core.Error(exception.message ?: "Unknown reason.")
             return Response.status(Response.Status.CONFLICT).entity(error).build()
         }
     }
