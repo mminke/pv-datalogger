@@ -56,15 +56,23 @@ class AuthenticationFilter : ContainerRequestFilter {
         if (authenticationHeaders != null) {
             for (authorizationHeader in authenticationHeaders) {
                 if (authorizationHeader.startsWith(BASIC_AUTHENTICATION_SCHEME)) {
-                    val encodedCredentials = authorizationHeader.replaceFirst(BASIC_AUTHENTICATION_SCHEME + " ", "")
-                    val decodedCredentials = String(Base64.getDecoder().decode(encodedCredentials))
-                    val tokenizer = StringTokenizer(decodedCredentials, ":")
-
-                    return Optional.of(Credentials(tokenizer.nextToken(), tokenizer.nextToken()))
+                    return obtainBasicAuthCredentials(authorizationHeader)
                 }
             }
         }
 
         return Optional.empty()
     }
+
+    fun obtainBasicAuthCredentials(authorizationHeader: String): Optional<Credentials> {
+        val encodedCredentials = authorizationHeader.replaceFirst(BASIC_AUTHENTICATION_SCHEME + " ", "")
+        val decodedCredentials = String(Base64.getDecoder().decode(encodedCredentials))
+        val tokenizer = StringTokenizer(decodedCredentials, ":")
+        if (tokenizer.countTokens() == 2) {
+            return Optional.of(Credentials(tokenizer.nextToken(), tokenizer.nextToken()))
+        }
+
+        return Optional.empty()
+    }
+
 }

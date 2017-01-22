@@ -3,6 +3,7 @@ package nl.kataru.pvdata.core
 import com.mongodb.client.MongoDatabase
 import nl.kataru.pvdata.accounts.Account
 import org.bson.Document
+import org.bson.types.ObjectId
 import java.util.*
 import javax.inject.Inject
 
@@ -40,6 +41,10 @@ open class InverterService {
         }
     }
 
+    fun createUsingAccount(measurement: Measurement, account: Account): Measurement {
+        throw NotImplementedError()
+    }
+
     fun save(account: Account) {
         throw UnsupportedOperationException("Not yet implemented")
     }
@@ -64,7 +69,7 @@ open class InverterService {
         val collection = mongoDatabase.getCollection(COLLECTION_INVERTERS)
 
         val query = Document()
-        query.append("_id", id)
+        query.append("_id", ObjectId(id))
         query.append("owner", account.id)
         val document = collection!!.find(query)?.first() ?: return Optional.empty()
 
@@ -88,7 +93,7 @@ open class InverterService {
         val collection = mongoDatabase.getCollection(COLLECTION_INVERTERS)
 
         val query = Document()
-        query.append("_id", id)
+        query.append("_id", ObjectId(id))
         query.append("owner", account.id)
 
         val result = collection!!.deleteOne(query)
@@ -104,7 +109,7 @@ open class InverterService {
         with(inverter)
         {
             if (!id.isNullOrBlank()) {
-                document.append("_id", id)
+                document.append("_id", ObjectId(id))
             }
             document.append("serialnumber", serialNumber)
             document.append("brand", brand)

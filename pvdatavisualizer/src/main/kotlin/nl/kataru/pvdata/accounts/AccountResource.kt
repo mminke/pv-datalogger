@@ -20,24 +20,6 @@ open class AccountResource() {
 
     @Context
     lateinit private var securityContext: SecurityContext
-//    @Context
-//    lateinit internal var requestContext: ContainerRequestContext
-
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    fun getAll(): Array<Inverter> {
-//        return arrayOf()
-//    }
-
-//    @GET
-//    @Path("{userName}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    fun getSingle(@PathParam("userName") userName: String): Response {
-//        val account = accountService!!.findWithUserName(userName)
-//
-//        val response = account.map { Response.ok(it) }.orElse(Response.status(Response.Status.NOT_FOUND))
-//        return response.build()
-//    }
 
     @GET
     @Path("{id}")

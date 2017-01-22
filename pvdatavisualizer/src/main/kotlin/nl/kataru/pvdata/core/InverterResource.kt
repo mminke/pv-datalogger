@@ -67,7 +67,7 @@ open class InverterResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun createInverter(inverter: Inverter): Response {
+    fun addInverter(inverter: Inverter): Response {
         val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
 
         try {
@@ -79,6 +79,23 @@ open class InverterResource {
             return Response.status(Response.Status.CONFLICT).entity(error).build()
         }
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    fun addMeasurement(measurement: Measurement): Response {
+        val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
+
+        try {
+            val createdMeasurement = inverterService.createUsingAccount(measurement, accountPrincipal.account)
+            return Response.ok("created measurement with id: ${createdMeasurement.id}").build()
+        } catch (exception: IllegalArgumentException) {
+            // An inverter with the given serialnumber already exists.
+            val error = nl.kataru.pvdata.core.Error(exception.message ?: "Unknown reason.")
+            return Response.status(Response.Status.CONFLICT).entity(error).build()
+        }
+    }
+
 }
 
 

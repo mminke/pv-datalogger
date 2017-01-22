@@ -17,7 +17,7 @@ import org.mockito.MockitoAnnotations
 /**
  *
  */
-class AccountServiceTest {
+class AccountResourceTest {
     private val COLLECTION_ACCOUNTS = "accounts"
 
     @Rule
