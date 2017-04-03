@@ -1,6 +1,7 @@
 package nl.kataru.pvdata.core
 
 import nl.kataru.pvdata.security.AccountPrincipal
+import java.net.URI
 import javax.inject.Inject
 import javax.ws.rs.*
 import javax.ws.rs.core.Context
@@ -72,7 +73,7 @@ open class InverterResource {
 
         try {
             val createdInverter = inverterService.createUsingAccount(inverter, accountPrincipal.account)
-            return Response.ok("created inverter with id: ${createdInverter.id}").build()
+            return Response.created(URI.create("/inverters/${createdInverter.id}")).build()
         } catch (exception: IllegalArgumentException) {
             // An inverter with the given serialnumber already exists.
             val error = nl.kataru.pvdata.core.Error(exception.message ?: "Unknown reason.")
@@ -83,16 +84,18 @@ open class InverterResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    fun addMeasurement(measurement: Measurement): Response {
+    @Path("{id}/measurements")
+    fun addMeasurement(@PathParam("id") id: String, inverterMeasurement: InverterMeasurement): Response {
         val accountPrincipal = securityContext.userPrincipal as AccountPrincipal
 
         try {
-            val createdMeasurement = inverterService.createUsingAccount(measurement, accountPrincipal.account)
-            return Response.ok("created measurement with id: ${createdMeasurement.id}").build()
+            val createdMeasurement = inverterService.createMeasurementUsingAccount(inverterMeasurement, accountPrincipal.account)
+            return Response.created(URI.create("/inverters/${id}/measurements/${createdMeasurement.id}")).build()
         } catch (exception: IllegalArgumentException) {
-            // An inverter with the given serialnumber already exists.
             val error = nl.kataru.pvdata.core.Error(exception.message ?: "Unknown reason.")
             return Response.status(Response.Status.CONFLICT).entity(error).build()
+        } catch(exception: SecurityException) {
+            return Response.status(Response.Status.FORBIDDEN).build()
         }
     }
 

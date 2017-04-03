@@ -1,6 +1,8 @@
 package nl.kataru.pvdata.accounts
 
+import nl.kataru.pvdata.core.Error
 import nl.kataru.pvdata.security.AccountPrincipal
+import java.net.URI
 import javax.annotation.security.PermitAll
 import javax.inject.Inject
 import javax.ws.rs.*
@@ -60,8 +62,8 @@ open class AccountResource() {
     @PermitAll
     fun create(account: Account): Response {
         try {
-            val id = accountService.create(account)
-            return Response.ok("created account with id: ${id}").build()
+            val createdAccount = accountService.create(account)
+            return Response.created(URI.create("/accounts/${createdAccount.id}")).build()
         } catch (exception: IllegalArgumentException) {
             // An inverter with the given serialnumber already exists.
             val error = Error("Could not create account. An account with the given user name already exists.")

@@ -1,19 +1,15 @@
-/**
- *
- */
 package nl.kataru.pvdata.support;
 
-import java.net.UnknownHostException;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoDatabase;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
-
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
-import com.mongodb.client.MongoDatabase;
+import java.net.UnknownHostException;
 
 /**
  * @author morten
@@ -26,14 +22,14 @@ public class MongoDBProducer {
 	private MongoClientURI mongoClientURI;
 
 	private MongoClient mongoClient;
-	private MongoDatabase databbase;
+	private MongoDatabase database;
 
 	@PostConstruct
 	public void init() throws UnknownHostException {
 		System.out.println("=====================Creates database");
 		final MongoClientURI uri = mongoClientURI;
 		mongoClient = new MongoClient(uri);
-		databbase = mongoClient.getDatabase(uri.getDatabase());
+		database = mongoClient.getDatabase(uri.getDatabase());
 	}
 
 	@PreDestroy
@@ -44,7 +40,7 @@ public class MongoDBProducer {
 
 	@Produces
 	public MongoDatabase getDB() {
-		return databbase;
+		return database;
 	}
 
 }

@@ -3,19 +3,14 @@ package nl.kataru.pvdata.core
 import com.mongodb.client.MongoDatabase
 import nl.kataru.pvdata.accounts.Account
 import org.bson.Document
+import org.bson.types.Decimal128
 import org.bson.types.ObjectId
 import java.util.*
 import javax.inject.Inject
 
-open class InverterService {
+open class InverterService @Inject constructor(private var mongoDatabase: MongoDatabase) {
     private val COLLECTION_INVERTERS = "inverters"
-
-    private var mongoDatabase: MongoDatabase
-
-    @Inject
-    constructor(mongoDatabase: MongoDatabase) {
-        this.mongoDatabase = mongoDatabase
-    }
+    private val COLLECTION_MEASUREMENTS = "measurements"
 
     /**
      * Create a new inverter entry in persistent storage.
@@ -39,10 +34,6 @@ open class InverterService {
         } else {
             throw RuntimeException("Unknown error occured, no id generated for new instance")
         }
-    }
-
-    fun createUsingAccount(measurement: Measurement, account: Account): Measurement {
-        throw NotImplementedError()
     }
 
     fun save(account: Account) {
@@ -104,6 +95,40 @@ open class InverterService {
         }
     }
 
+    fun createMeasurementUsingAccount(inverterMeasurement: InverterMeasurement, account: Account): InverterMeasurement {
+        if (!findByIdUsingAccount(inverterMeasurement.inverterId, account).isPresent) {
+            throw SecurityException("Inverter ${inverterMeasurement.inverterId} not owned by account ${account.id}.")
+        }
+
+        if (findMeasurementByTimestampForInverter(inverterMeasurement.timestamp, inverterMeasurement.inverterId).isPresent) {
+            throw IllegalArgumentException("Measurement for the timestamp ${inverterMeasurement.timestamp} already exists")
+        }
+
+        val document = transformToDocument(inverterMeasurement)
+
+        val dbCollection = mongoDatabase.getCollection(COLLECTION_MEASUREMENTS)
+        dbCollection?.insertOne(document)
+        val objectId = document.getObjectId("_id")
+        if (objectId != null) {
+            return transformToMeasurement(document)
+        } else {
+            throw RuntimeException("Unknown error occured, no id generated for new instance")
+        }
+    }
+
+    fun findMeasurementByTimestampForInverter(timestamp: Long, inverterId: String): Optional<InverterMeasurement> {
+        val collection = mongoDatabase.getCollection(COLLECTION_MEASUREMENTS)
+
+        val query = Document()
+        query.append("timestamp", timestamp)
+        query.append("inverterId", inverterId)
+        val document = collection!!.find(query)?.first() ?: return Optional.empty()
+
+        val measurement = transformToMeasurement(document)
+        return Optional.of(measurement)
+    }
+
+
     fun transformToDocument(inverter: Inverter): Document {
         val document: Document = Document()
         with(inverter)
@@ -131,6 +156,40 @@ open class InverterService {
 
             val inverter = Inverter(id, serialNumber, brand, type, ratedPower, owner)
             return inverter
+        }
+    }
+
+    fun transformToDocument(inverterMeasurement: InverterMeasurement): Document {
+        val document: Document = Document()
+        with(inverterMeasurement)
+        {
+            if (!id.isNullOrBlank()) {
+                document.append("_id", ObjectId(id))
+            }
+            document.append("inverterId", inverterId)
+            document.append("timestamp", timestamp)
+            document.append("temperature", Decimal128(temperature))
+            document.append("yieldToday", Decimal128(yieldToday))
+            document.append("yieldTotal", Decimal128(yieldTotal))
+            document.append("totalOperatingHours", Decimal128(totalOperatingHours))
+            document.append("rawData", rawData)
+        }
+        return document
+    }
+
+    fun transformToMeasurement(document: Document): InverterMeasurement {
+        with(document) {
+            val id = getObjectId("_id").toString()
+            val inverterId = getString("inverterId")
+            val timestamp = getLong("timestamp")
+            val temperature = (get("temperature") as Decimal128).bigDecimalValue()
+            val yieldToday = ((get("yieldToday") ?: Decimal128(-1)) as Decimal128).bigDecimalValue()
+            val yieldTotal = ((get("yieldTotal") ?: Decimal128(-1)) as Decimal128).bigDecimalValue()
+            val totalOperatingHours = ((get("totalOperatingHours") ?: Decimal128(-1)) as Decimal128).bigDecimalValue()
+            val rawData = getString("rawData")
+
+            val measurement = InverterMeasurement(id, inverterId, timestamp, temperature, yieldToday, yieldTotal, totalOperatingHours, rawData)
+            return measurement
         }
     }
 }
