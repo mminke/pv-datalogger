@@ -1,19 +1,12 @@
 package nl.kataru.pvdatalogger.pvdatalogger;
 
-import java.util.Map;
-
-import org.apache.commons.cli.BasicParser;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.jboss.netty.logging.InternalLoggerFactory;
 import org.jboss.netty.logging.Slf4JLoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * The main PVDatalogger class
@@ -142,68 +135,70 @@ public class PVDatalogger {
 	private static void printData(Map<String, String> pvData, boolean printRawData) {
 		System.out.print(pvData.get("timestamp"));							// 1
 		System.out.print(",");
-		System.out.print(pvData.get("serialnumber"));						// 2
+		System.out.print(pvData.get("datalogger_sn"));                        // 2
 		System.out.print(",");
-		System.out.print(pvData.get("firmware_version_main"));				// 3
+		System.out.print(pvData.get("inverter_sn"));                        // 3
 		System.out.print(",");
-		System.out.print(pvData.get("firmware_version_slave"));				// 4
+		System.out.print(pvData.get("firmware_version_main"));                // 4
 		System.out.print(",");
-		System.out.print(pvData.get("inverter_model"));						// 5 <== only available when using the poller
+		System.out.print(pvData.get("firmware_version_slave"));                // 5
 		System.out.print(",");
-		System.out.print(pvData.get("inverter_ratedpower"));				// 6 <== only available when using the poller
+		System.out.print(pvData.get("inverter_model"));                        // 6 <== only available when using the poller
 		System.out.print(",");
-		System.out.print(pvData.get("yield_today"));						// 7
+		System.out.print(pvData.get("inverter_ratedpower"));                // 7 <== only available when using the poller
 		System.out.print(",");
-		System.out.print(pvData.get("yield_total"));						// 8
+		System.out.print(pvData.get("yield_today"));                        // 8
 		System.out.print(",");
-		System.out.print(pvData.get("hours_total"));						// 9
+		System.out.print(pvData.get("yield_total"));                        // 9
 		System.out.print(",");
-		System.out.print(pvData.get("temp"));								// 10
+		System.out.print(pvData.get("hours_total"));                        // 10
 		System.out.print(",");
-		System.out.print(pvData.get("vpv1"));								// 11
+		System.out.print(pvData.get("temp"));                                // 11
 		System.out.print(",");
-		System.out.print(pvData.get("vpv2"));								// 12
+		System.out.print(pvData.get("vpv1"));                                // 12
 		System.out.print(",");
-		System.out.print(pvData.get("vpv3"));								// 13
+		System.out.print(pvData.get("vpv2"));                                // 13
 		System.out.print(",");
-		System.out.print(pvData.get("ipv1"));								// 14
+		System.out.print(pvData.get("vpv3"));                                // 14
 		System.out.print(",");
-		System.out.print(pvData.get("ipv2"));								// 15
+		System.out.print(pvData.get("ipv1"));                                // 15
 		System.out.print(",");
-		System.out.print(pvData.get("ipv3"));								// 16
+		System.out.print(pvData.get("ipv2"));                                // 16
 		System.out.print(",");
-		System.out.print(pvData.get("iac1"));								// 17
+		System.out.print(pvData.get("ipv3"));                                // 17
 		System.out.print(",");
-		System.out.print(pvData.get("iac2"));								// 18
+		System.out.print(pvData.get("iac1"));                                // 18
 		System.out.print(",");
-		System.out.print(pvData.get("iac3"));								// 19
+		System.out.print(pvData.get("iac2"));                                // 19
 		System.out.print(",");
-		System.out.print(pvData.get("vac1"));								// 20
+		System.out.print(pvData.get("iac3"));                                // 20
 		System.out.print(",");
-		System.out.print(pvData.get("vac2"));								// 21
+		System.out.print(pvData.get("vac1"));                                // 21
 		System.out.print(",");
-		System.out.print(pvData.get("vac3"));								// 22
+		System.out.print(pvData.get("vac2"));                                // 22
 		System.out.print(",");
-		System.out.print(pvData.get("fac1"));								// 23
+		System.out.print(pvData.get("vac3"));                                // 23
 		System.out.print(",");
-		System.out.print(pvData.get("pac1"));								// 24
+		System.out.print(pvData.get("fac1"));                                // 24
 		System.out.print(",");
-		System.out.print(pvData.get("fac2"));								// 25
+		System.out.print(pvData.get("pac1"));                                // 25
 		System.out.print(",");
-		System.out.print(pvData.get("pac2"));								// 26
+		System.out.print(pvData.get("fac2"));                                // 26
 		System.out.print(",");
-		System.out.print(pvData.get("fac3"));								// 27
+		System.out.print(pvData.get("pac2"));                                // 27
 		System.out.print(",");
-		System.out.print(pvData.get("pac3"));								// 28
+		System.out.print(pvData.get("fac3"));                                // 28
 		System.out.print(",");
-		System.out.print(stripNewlineCharacters(pvData.get("message")));	// 29
+		System.out.print(pvData.get("pac3"));                                // 29
 		System.out.print(",");
-		System.out.print(pvData.get("alarms"));								// 30 <== only available when using the poller
+		System.out.print(stripNewlineCharacters(pvData.get("message")));    // 30
 		System.out.print(",");
-		System.out.print(pvData.get("data_age"));							// 31 <== only available when using the poller
+		System.out.print(pvData.get("alarms"));                                // 31 <== only available when using the poller
+		System.out.print(",");
+		System.out.print(pvData.get("data_age"));                            // 32 <== only available when using the poller
 		if (printRawData) {
 			System.out.print(",");
-			System.out.print(pvData.get("rawdata"));						// 32
+			System.out.print(pvData.get("rawdata"));                        // 33
 		}
 
 		System.out.println();

@@ -2,6 +2,7 @@ package nl.kataru.pvdatalogger.pvdatalogger;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,6 +20,7 @@ public class OmnikDataTransformer {
         final int messageVersion = rawData[1] & 0xFF;
         validateMessageVersion(messageVersion);
         validateFrameSize(messageVersion, rawData.length);
+        validateDataLoggerSerialNumber(rawData, messageVersion);
 
         final int offset = determineOffset(messageVersion);
 
@@ -27,7 +29,8 @@ public class OmnikDataTransformer {
         final Date now = new Date();
 
         result.put("timestamp", isoDateFormat.format(now));
-        result.put("serialnumber", transformToString(byteBuffer, 15, 16));
+        result.put("datalogger_sn", "" + transformIntegerLittleEndian(byteBuffer, 4, 1));
+        result.put("inverter_sn", transformToString(byteBuffer, 15, 16));
         result.put("temp", "" + transformShort(byteBuffer, 31, 10));
         result.put("vpv1", "" + transformShort(byteBuffer, 33, 10));
         result.put("vpv2", "" + transformShort(byteBuffer, 35, 10));
@@ -85,6 +88,25 @@ public class OmnikDataTransformer {
         }
     }
 
+    private void validateDataLoggerSerialNumber(byte[] rawData, int messageVersion)
+    {
+        int offset = determineOffset(messageVersion);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN);
+        int sn1 = byteBuffer.getInt(4);
+        int sn2 = byteBuffer.getInt(8);
+        int sn3 = byteBuffer.getInt(143 + offset);
+        int sn4 = byteBuffer.getInt(147 + offset);
+        if (!allEqual(sn1, sn2, sn3, sn4))
+        {
+            throw new IllegalArgumentException("Input data does not contain correct data logger serial number information.");
+        }
+    }
+
+    private boolean allEqual(int sn1, int sn2, int sn3, int sn4)
+    {
+        return sn1 == sn2 && sn2 == sn3 && sn3 == sn4;
+    }
+
     private int determineOffset(int messageVersion) {
         int offset = 0;
         if (messageVersion == 0x81) {
@@ -109,6 +131,20 @@ public class OmnikDataTransformer {
             return new BigDecimal(value);
         } else {
             return new BigDecimal(value).divide(new BigDecimal(divisor));
+        }
+    }
+
+    private BigDecimal transformIntegerLittleEndian(ByteBuffer byteBuffer, int offset, int divisor)
+    {
+        final int value = byteBuffer.getInt(offset);
+        final int littleEndianValue = Integer.reverseBytes(value);
+
+        if (value == -1)
+        {
+            return new BigDecimal(littleEndianValue);
+        } else
+        {
+            return new BigDecimal(littleEndianValue).divide(new BigDecimal(divisor));
         }
     }
 

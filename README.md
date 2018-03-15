@@ -83,38 +83,52 @@ The two versions I have found, have a difference in the header which I think is 
 The 7D version message size is 170 and the 81 version message size is 174.
 
 ### Common for both message versions
+ 
+The hex column and dec column show the position in the message in bytes. The length gives the length of the fields in bytes. 
+The type describes how the data is encoded, see the type explanation further down below. The description is, eugh well, the description!
 
-The hex column and dec column show the position in the message in bytes. The length gives the length of the fields in bytes and the description is, eugh well, the description!
+| HEX | DEC | LENGTH | TYPE       | DESCRIPTION
+| --- | --- | ------ | ---------- | --------------------------------------
+| 00  | 000 | [1]    |            | Fixed value [68] (same as request message)	
+| 01  | 001 | [1]    |            | Message version 7D or 81 hex
+| 02  | 002 | [2]    |            | Always the same [41 b0]
+| 04  | 004 | [4]    | UINT32 LE  | Data Logger Serial Number
+| 08  | 008 | [4]    | UINT32 LE  | Data Logger Serial Number (repeated!?)
+| 0C  | 012 | [3]    |            | Always the same [81 02 01]
+| 0F  | 015 | [15]   | CHAR       | Inverter Serial Number
+| 1F  | 031 | [2]    | INT16 BE   | Temperature
+| 21  | 033 | [2]    | INT16 BE   | vpv1	Voltage Panels 1st String
+| 23  | 035 | [2]    | INT16 BE   | vpv2	Voltage Panels 2nd String
+| 25  | 037 | [2]    | INT16 BE   | vpv3	Voltage Panels 3rd String
+| 27  | 039 | [2]    | INT16 BE   | ipv1	Current Panels 1st String
+| 29  | 041 | [2]    | INT16 BE   | ipv2	Current Panels 2nd String
+| 2B  | 043 | [2]    | INT16 BE   | ipv3	Current Panels 3rd String
+| 2D  | 045 | [2]    | INT16 BE   | iac1	Current AC Phase 1
+| 2F  | 047 | [2]    | INT16 BE   | iac2	Current AC Phase 2
+| 31  | 049 | [2]    | INT16 BE   | iac3	Current AC Phase 3
+| 33  | 051 | [2]    | INT16 BE   | vac1	Voltage AC Phase 1
+| 35  | 053 | [2]    | INT16 BE   | vac2	Voltage AC Phase 2
+| 37  | 055 | [2]    | INT16 BE   | vac3	Voltage AC Phase 3
+| 39  | 057 | [2]    | INT16 BE   | fac1	Frequency AC Phase 1
+| 3B  | 059 | [2]    | INT16 BE   | pac1	Power AC Phase 1
+| 3D  | 061 | [2]    | INT16 BE   | fac2	Frequency AC Phase 2
+| 3F  | 063 | [2]    | INT16 BE   | pac2	Power AC Phase 2
+| 41  | 065 | [2]    | INT16 BE   | fac3	Frequency AC Phase 3
+| 43  | 067 | [2]    | INT16 BE   | pac3	Power AC Phase 3
+| 45  | 069 | [2]    | INT16 BE   | yield today
+| 47  | 071 | [4]    | UINT32 BE  | yield total
+| 4B  | 075 | [4]    | UINT32 BE  | inverter total hours since last reset
+| 4F  | 079 | [18]   |            | always same values (000100000000FFFF00000000000000000000)
 
-| HEX | DEC | LENGTH | DESCRIPTION
-| --- | --- | ------ | -------------------------------------------
-| 00  | 000 | [1]    | Fixed value [68] (same as request message)	
-| 01  | 001 | [1]    | Message version 7D or 81 hex
-| 02  | 002 | [13]   | Always the same for messages from the same firmware version for version 7D: [ 41 b0 ce 1d 15 24 ce 1d 15 24 81 02 01 ], for version 81: [ 41 B0 9D 8B 75 5F 9D 8B 75 5F 81 02 01 ]
-| 0F  | 015 | [15]   | Inverter Serial Number
-| 1F  | 031 | [2]    | Temperature
-| 21  | 033 | [2]    | vpv1	Voltage Panels 1st String
-| 23  | 035 | [2]    | vpv2	Voltage Panels 2nd String
-| 25  | 037 | [2]    | vpv3	Voltage Panels 3rd String
-| 27  | 039 | [2]    | ipv1	Current Panels 1st String
-| 29  | 041 | [2]    | ipv2	Current Panels 2nd String
-| 2B  | 043 | [2]    | ipv3	Current Panels 3rd String
-| 2D  | 045 | [2]    | iac1	Current AC Phase 1
-| 2F  | 047 | [2]    | iac2	Current AC Phase 2
-| 31  | 049 | [2]    | iac3	Current AC Phase 3
-| 33  | 051 | [2]    | vac1	Voltage AC Phase 1
-| 35  | 053 | [2]    | vac2	Voltage AC Phase 2
-| 37  | 055 | [2]    | vac3	Voltage AC Phase 3
-| 39  | 057 | [2]    | fac1	Frequency AC Phase 1
-| 3B  | 059 | [2]    | pac1	Power AC Phase 1
-| 3D  | 061 | [2]    | fac2	Frequency AC Phase 2
-| 3F  | 063 | [2]    | pac2	Power AC Phase 2
-| 41  | 065 | [2]    | fac3	Frequency AC Phase 3
-| 43  | 067 | [2]    | pac3	Power AC Phase 3
-| 45  | 069 | [2]    | yield today
-| 47  | 071 | [4]    | yield total
-| 4B  | 075 | [4]    | inverter total hours since last reset
-| 4F  | 079 | [18]   | always same values (000100000000FFFF00000000000000000000)
+Type explanation
+
+| TYPE      |
+| --------- | ---------------------------------------------------
+| UINT32 LE | Unsigned Integer 32 bits, Little Endian encoded
+| INT16 BE  | Unsigned Integer 16 bits, Big Endian encoded
+| CHAR      | Each byte value is a (ASCII) character
+
+
 
 ### Specific for a certain version
 
@@ -132,7 +146,8 @@ The two versions currently known are 7D and 81.
 | 7E      | 126     | 82      | 130     | [11]       | always same values (0000000000000000000000)
 | 89      | 137     | 8D      | 141     | [1]        | Changing value
 | 8A      | 138     | 8E      | 142     | [5]        | always same values (16681141f0)
-| 8F      | 143     | 93      | 147     | [8]        | always same value depending on version/inverter (ce1d1524ce1d1524 / 9D8B755F9D8B755F)
+| 8F      | 143     | 93      | 147     | [4]        | Data Logger Serial Number
+| 93      | 147     | 97      | 151     | [4]        | Data Logger Serial Number (repeated)
 | 97      | 151     | 9B      | 155     | [17]       | Status Message [DATA SEND IS OK]
 | A8      | 168     | n/a     | n/a     | [1]        | Changing value (CHECKSUM??)
 | n/a     | n/a     | AC      | 172     | [1]        | always same values (2B)

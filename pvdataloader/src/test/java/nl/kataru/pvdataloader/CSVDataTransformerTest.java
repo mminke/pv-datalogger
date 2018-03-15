@@ -3,14 +3,13 @@
  */
 package nl.kataru.pvdataloader;
 
-import java.util.List;
-
+import com.mongodb.DBObject;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.mongodb.DBObject;
+import java.util.List;
 
 /**
  * @author morten
@@ -27,14 +26,17 @@ public class CSVDataTransformerTest {
 	public void testTransform() {
 		final CSVDataTransformer transformer = new CSVDataTransformer();
 
-		final String csv = "2015-06-24 21:28:04 063,NLDN2020145H2050,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,688141B09D8B755F9D8B755F8102014E4C444E323032303134354832303530011B09E60000FFFF000100B3FFFF0001FFFFFFFF0900FFFFFFFF138B0016FFFFFFFFFFFFFFFF039900005AA600000FEC000100000000FFFF000000000000000000000000D7B94E4C312D56312E302D303036372D34000000000056312E362D3030323100000000000000000000002916681141F09D8B755F9D8B755F444154412053454E44204953204F4B0D0A2B16";
-
+        final String csv = "2015-06-24 21:28:04 063,0987654321,ABCD012345678900,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 		final DBObject result = transformer.transform(csv);
 
 		Assert.assertNotNull(result);
+        Assert.assertNotNull(result.get("datalogger"));
+        final DBObject dataLogger = (DBObject) result.get("datalogger");
+        Assert.assertEquals("0987654321", dataLogger.get("serialnumber"));
+
 		Assert.assertNotNull(result.get("inverter"));
 		final DBObject inverterData = (DBObject) result.get("inverter");
-		Assert.assertEquals("NLDN2020145H2050", inverterData.get("serialnumber"));
+        Assert.assertEquals("ABCD012345678900", inverterData.get("serialnumber"));
 		Assert.assertEquals("NL1-V1.0-0067-4", inverterData.get("firmware_version_main"));
 		Assert.assertEquals("V1.6-0021", inverterData.get("firmware_version_slave"));
 
@@ -65,7 +67,7 @@ public class CSVDataTransformerTest {
 		Assert.assertEquals(null, systemData.get("alarms"));
 		Assert.assertEquals(null, systemData.get("data_age"));
 
-		final String rawDataResult = "688141B09D8B755F9D8B755F8102014E4C444E323032303134354832303530011B09E60000FFFF000100B3FFFF0001FFFFFFFF0900FFFFFFFF138B0016FFFFFFFFFFFFFFFF039900005AA600000FEC000100000000FFFF000000000000000000000000D7B94E4C312D56312E302D303036372D34000000000056312E362D3030323100000000000000000000002916681141F09D8B755F9D8B755F444154412053454E44204953204F4B0D0A2B16";
+        final String rawDataResult = "AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 		Assert.assertEquals(rawDataResult, result.get("rawdata"));
 
 	}
@@ -77,7 +79,7 @@ public class CSVDataTransformerTest {
 		final String csv = "Non CSV string";
 
 		expectedEx.expect(TransformException.class);
-		expectedEx.expectMessage("CSV input is not of the correct length. It should contain either 31 or 32 values.");
+        expectedEx.expectMessage("CSV input is not of the correct length. It should contain either 32 or 33 values.");
 
 		transformer.transform(csv);
 	}
@@ -86,7 +88,7 @@ public class CSVDataTransformerTest {
 	public void testTransformWithInvalidTimestamp() {
 		final CSVDataTransformer transformer = new CSVDataTransformer();
 
-		final String csv = "201506-24 2128:04 063,NLDN2020145H2050,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,688141B09D8B755F9D8B755F8102014E4C444E323032303134354832303530011B09E60000FFFF000100B3FFFF0001FFFFFFFF0900FFFFFFFF138B0016FFFFFFFFFFFFFFFF039900005AA600000FEC000100000000FFFF000000000000000000000000D7B94E4C312D56312E302D303036372D34000000000056312E362D3030323100000000000000000000002916681141F09D8B755F9D8B755F444154412053454E44204953204F4B0D0A2B16";
+        final String csv = "201506-24 2128:04 063,0987654321,ABCD012345678900,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
 		expectedEx.expect(TransformException.class);
 		expectedEx.expectMessage("The first value is not a correct ISO date format. It cannot be converted to a Date object.");
@@ -98,7 +100,7 @@ public class CSVDataTransformerTest {
 	public void testTransformWithInvalidNumber() {
 		final CSVDataTransformer transformer = new CSVDataTransformer();
 
-		final String csv = "2015-06-24 21:28:04 063,NLDN2020145H2050,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21.7,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,688141B09D8B755F9D8B755F8102014E4C444E323032303134354832303530011B09E60000FFFF000100B3FFFF0001FFFFFFFF0900FFFFFFFF138B0016FFFFFFFFFFFFFFFF039900005AA600000FEC000100000000FFFF000000000000000000000000D7B94E4C312D56312E302D303036372D34000000000056312E362D3030323100000000000000000000002916681141F09D8B755F9D8B755F444154412053454E44204953204F4B0D0A2B16";
+        final String csv = "2015-06-24 21:28:04 063,0987654321,ABCD012345678900,NL1-V1.0-0067-4,V1.6-0021,null,null,9.21.7,2320.6,4076,28.3,253.4,0,-1,0.1,17.9,-1,0.1,-1,-1,230.4,-1,-1,50.03,22,-1,-1,-1,-1,DATA SEND IS OK,null,null,AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ";
 
 		expectedEx.expect(TransformException.class);
 		expectedEx.expectMessage("Error occured while parsing the CSV data. Error message is: multiple points");

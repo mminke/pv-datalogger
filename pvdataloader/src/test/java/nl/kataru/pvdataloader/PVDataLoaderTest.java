@@ -1,38 +1,23 @@
-/**
- *
- */
 package nl.kataru.pvdataloader;
+
+import com.mongodb.DBObject;
+import nl.kataru.pvdataloader.PVDataLoader.Mode;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-
-import com.mongodb.DBObject;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
-import nl.kataru.pvdataloader.PVDataLoader.Mode;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author morten
@@ -40,8 +25,9 @@ import nl.kataru.pvdataloader.PVDataLoader.Mode;
  */
 public class PVDataLoaderTest {
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
-	private static final String PVDATA_1 = "2015-06-23 21:43:52 034,SERIALNUMBER2,NL1-V1.0-0067-4,V1.6-0021,null,null,5.83,35.5,79,29.7,246.5,0,-1,0,18,-1,0.1,-1,-1,230.4,-1,-1,50.04,10,-1,-1,-1,-1,DATA SEND IS OK,null,null,688141B09D8B755F9D8B755F8102014E4C444E323032303134354832303530012909A10000FFFF000000B4FFFF0001FFFFFFFF0900FFFFFFFF138C000AFFFFFFFFFFFFFFFF0247000001630000004F000100000000FFFF000000000000000000000000D9684E4C312D56312E302D303036372D34000000000056312E362D303032310000000000000000000000FD16681141F09D8B755F9D8B755F444154412053454E44204953204F4B0D0A2B16"
+	private static final String PVDATA_1 = "2015-06-23 21:43:52 034,DATALOGGER_SN1,INVERTER_SN1,NL1-V1.0-0067-4,V1.6-0021,null,null,5.83,35.5,79,29.7,246.5,0,-1,0,18,-1,0.1,-1,-1,230.4,-1,-1,50.04,10,-1,-1,-1,-1,DATA SEND IS OK,null,null,AABBCCDDEEFFGGHHIIJJKKLLMMNNOOPPQQRRSSTTUUVVWWXXYYZZ"
 			+ LINE_SEPARATOR;
+	public static final String TEST_FILE1 = "src/test/resources/testdata/testdata1.log";
 
 	/**
 	 * Test basic usage of the PVDataLoader without following the file. Read a single line inputfile and check if the correct data is returned.
@@ -53,7 +39,7 @@ public class PVDataLoaderTest {
 	public void testBasicUsageWithoutTailer() {
 		final PVDataRepository dataRepository = mock(PVDataRepository.class);
 
-		final Path inputfilePath = Paths.get("src/test/resources/testdata/testdata1.log");
+		final Path inputfilePath = Paths.get(TEST_FILE1);
 		final PVDataLoader pvDataLoader = new PVDataLoader(inputfilePath, Mode.READ_UNTIL_EOF, dataRepository);
 		pvDataLoader.start();
 
@@ -63,7 +49,7 @@ public class PVDataLoaderTest {
 		final DBObject dbObject = dbObjectCaptor.getValue();
 		final DBObject inverter = (DBObject) dbObject.get("inverter");
 		assertNotNull(inverter);
-		assertEquals("SERIALNUMBER1", inverter.get("serialnumber"));
+		assertEquals("INVERTER_SN1", inverter.get("serialnumber"));
 
 		verifyNoMoreInteractions(dataRepository);
 	}
@@ -80,7 +66,7 @@ public class PVDataLoaderTest {
 		final PVDataRepository dataRepository = mock(PVDataRepository.class);
 
 		// Copy the test data file to a temporary file, because this tests needs to edit the file
-		final Path sourcePath = Paths.get("src/test/resources/testdata/testdata1.log");
+		final Path sourcePath = Paths.get(TEST_FILE1);
 		final Path destinationPath = Paths.get("src/test/resources/testdata/temp.log");
 
 		Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
@@ -102,7 +88,7 @@ public class PVDataLoaderTest {
 		DBObject dbObject = dbObjectCaptor.getValue();
 		DBObject inverter = (DBObject) dbObject.get("inverter");
 		assertNotNull(inverter);
-		assertEquals("SERIALNUMBER1", inverter.get("serialnumber"));
+		assertEquals("INVERTER_SN1", inverter.get("serialnumber"));
 
 		// Now while the PVDataLoader is started, update the file, to see if the update gets processed.
 		Files.write(destinationPath, PVDATA_1.getBytes(), StandardOpenOption.APPEND);
@@ -116,7 +102,7 @@ public class PVDataLoaderTest {
 		dbObject = dbObjectCaptor.getValue();
 		inverter = (DBObject) dbObject.get("inverter");
 		assertNotNull(inverter);
-		assertEquals("SERIALNUMBER2", inverter.get("serialnumber"));
+		assertEquals("INVERTER_SN1", inverter.get("serialnumber"));
 
 		verifyNoMoreInteractions(dataRepository);
 
